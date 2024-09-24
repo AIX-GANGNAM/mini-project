@@ -17,7 +17,7 @@
     "reactstrap": "^9.2.2",
     "web-vitals": "^2.1.4"
   },
-  "proxy": "http://221.148.97.237:7860",
+  "proxy": "http://127.0.0.1:7860",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
