@@ -112,3 +112,21 @@ select:focus {
     border: 1px solid #dbdbdb;
     border-radius: 8px;
 }
+
+.download-button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.download-button:hover {
+    background-color: #45a049;
+}
