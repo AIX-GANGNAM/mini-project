@@ -28,6 +28,15 @@ export default function Create() {
         setIsLoading(false);
     };
 
+    const handleDownload = () => {
+        const link = document.createElement('a');
+        link.href = generatedImage;
+        link.download = 'generated-image.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className="create-container">
             <div className="input-section">
@@ -48,7 +57,12 @@ export default function Create() {
             </div>
             <div className="result-section">
                 {generatedImage ? (
-                    <img src={generatedImage} alt="Generated Image" />
+                    <>
+                        <img src={generatedImage} alt="Generated Image" />
+                        <button className="download-button" onClick={handleDownload}>
+                            Download Image
+                        </button>
+                    </>
                 ) : (
                     <div className="placeholder">
                         Your generated image will appear here.
