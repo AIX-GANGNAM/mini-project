@@ -1,0 +1,37 @@
+.main_outline{
+    width: 100vw;
+    height: 100vh;
+    background-color: cyan;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.main_content{
+    width: 80%;
+    height: 90%;
+    background-color: wheat;
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: 20% 80%;
+    grid-template-areas: 'title title'
+                        'left right';
+}
+
+.main_title{
+    grid-area: title;
+    background-color: red;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: black;
+    font-size: 5rem;
+}
+.image_create{
+    grid-area: left;
+    background-color: cadetblue;
+}
+.image_swap{
+    grid-area: right;
+    background-color: violet ;
+}
