@@ -55,7 +55,7 @@ const Swap = () => {
             <div className="upload-content">
               <h3>원본 이미지 업로드</h3>
               <p className="middle-text">얼굴 이외의 영역을 유지합니다</p>
-              <p className="bottom-text">여기에 파일을 드래그 앤 드롭 하세요</p>
+              <p className="bottom-text">사진을 추가 해주세요</p>
             </div>
           )}
         </div>
@@ -68,7 +68,7 @@ const Swap = () => {
             <div className="upload-content">
               <h3>교체 얼굴 업로드</h3>
               <p>원본 이미지에서 얼굴을 교체합니다</p>
-              <p>여기에 파일을 드래그 앤 드롭 하세요</p>
+              <p>사진을 추가 해주세요</p>
             </div>
           )}
         </div>
@@ -80,23 +80,25 @@ const Swap = () => {
         <button className="upload-button" onClick={handleSaveClick}>저장하기</button>
       </div>
 
-      {swappedImage && (
-        <div className="result-section">
-          <h3>교체된 이미지</h3>
-          <img src={swappedImage} alt="Swapped" />
-        </div>
-      )}
-
-      {history.length > 0 && (
-        <div className="history-section">
-          <h3>히스토리</h3>
-          <div className="history-images">
-            {history.map((img, index) => (
-              <img key={index} src={img} alt={`History ${index + 1}`} />
-            ))}
+      <div className="scroll-container">
+        {swappedImage && (
+          <div className="result-section">
+            <h3>교체된 이미지</h3>
+            <img src={swappedImage} alt="Swapped" className="swapped-image" />
           </div>
-        </div>
-      )}
+        )}
+
+        {history.length > 0 && (
+          <div className="history-section">
+            <h3>히스토리</h3>
+            <div className="history-images">
+              {history.map((img, index) => (
+                <img key={index} src={img} alt={`History ${index + 1}`} className="history-image" />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
