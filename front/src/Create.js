@@ -11,7 +11,7 @@ export default function Create() {
     const handleGenerate = async () => {
         setIsLoading(true);
         try {
-            const response = await axios.post('http://127.0.0.1:7860/sdapi/v1/txt2img', {
+            const response = await axios.post('http://221.148.97.237:7860/sdapi/v1/txt2img', {
                 prompt: "A highly detailed, ultra-realistic portrait of a young woman, soft lighting, sharp focus, natural skin texture, cinematic, 35mm photography, bokeh background, 4k resolution, vibrant colors, looking directly at the camera, realistic lighting," + prompt,
                 negative_prompt: "low quality, blurry, deformed, extra limbs, bad anatomy, cartoon, painting, drawing, unrealistic, overexposed, underexposed, noisy, grain",
                 steps: 20,
