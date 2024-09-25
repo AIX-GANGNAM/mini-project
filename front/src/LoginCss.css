@@ -1,0 +1,185 @@
+
+
+:root {
+  --bg: rgb(240, 230, 205);
+  --theme: rgb(222, 204, 207);
+  --theme-two: #FFFFFF;
+  --text: #000000;
+  --secondary-text: #4A4A4A;
+  --border: #D2B48C;
+  --button-hover: rgb(202, 184, 187);
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  font-family: "Pacifico", cursive;
+    font-weight: 400;
+    font-style: normal;
+}
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 1rem;
+  background: var(--bg);
+}
+
+.login {
+  max-width: 1000px;
+  width: 90vw;
+  height: 600px;
+  background: var(--theme-two);
+  border-radius: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  overflow: hidden;
+}
+
+.Panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.ActionPanel {
+  flex: 1;
+  background: var(--theme);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.FormPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.Panel h2 {
+  font-size: 1.9rem;
+  text-transform: capitalize;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+
+.Panel p {
+  margin: 1rem 0;
+  max-width: 25ch;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  font-weight: 300;
+  text-align: center;
+  color: var(--secondary-text);
+}
+
+.Panel a, .Panel button {
+  color: inherit;
+  font-family: inherit;
+}
+
+.Panel a {
+  text-decoration: none;
+  margin: 1rem;
+  color: var(--text);
+}
+
+.Panel .Social {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.Panel .Social a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 200px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--theme);
+  color: var(--text);
+  margin: 0 0.5rem;
+}
+
+.Panel .Social a:hover,
+.Panel .Social a:focus {
+  background: var(--theme);
+  color: var(--text);
+  border: none;
+}
+
+.Panel form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 300px;
+}
+
+.Panel form input {
+  margin: 0.5rem 0;
+  padding: 1rem 0.75rem;
+  background: var(--theme-two);
+  border: 1px solid var(--theme);
+  border-radius: 3px;
+  color: var(--text);
+  font-family: inherit;
+}
+
+.Panel form input::placeholder {
+  color: var(--secondary-text);
+}
+
+.Panel button {
+  background: var(--theme);
+  border: none;
+  border-radius: 3px;
+  padding: 0.85rem 2.75rem;
+  margin: 1rem 0;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.Panel button:hover {
+  background: var(--button-hover);
+}
+
+.ActionPanel button {
+  background: transparent;
+  border: 1px solid var(--text);
+  color: var(--text);
+}
+
+.ActionPanel button:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .App {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .Panel {
+    padding: 2rem 1rem;
+  }
+  
+  .ActionPanel {
+    order: -1;
+  }
+}
