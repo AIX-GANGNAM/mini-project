@@ -1,27 +1,33 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginWithEmail, signupWithEmail, loginWithGoogle } from './redux/authSlice';
+import { loginWithEmail, signupWithEmail, loginWithGoogle,signupWithGoogle } from './redux/authSlice';
 import './LoginCss.css'
 import Swal from 'sweetalert2'
 
-const ActionPanel = ({ signIn, slide, setEmail, setPass }) => {
-  const heading = signIn ? 'Hello friend!' : 'Welcome back!';
-  const paragraph = signIn
+const ActionPanel = ({ isSignIn, onModeChange, setEmail, setPass }) => {
+  const heading = isSignIn ? 'Hello friend!' : 'Welcome back!';
+  const paragraph = isSignIn
     ? 'Enter your personal details and start your journey with us'
     : 'To keep connected with us please login with your personal info';
-  const button = signIn ? 'Sign up!' : 'Sign in!';
+  const button = isSignIn ? 'Sign up!' : 'Sign in!';
+
+  const handleModeChange = () => {
+    setEmail('');
+    setPass('');
+    onModeChange();
+  };
 
   return (
     <div className="Panel ActionPanel">
       <h2>{heading}</h2>
       <p>{paragraph}</p>
-      <button onClick={() => slide(setEmail, setPass)}>{button}</button>
+      <button onClick={handleModeChange}>{button}</button>
     </div>
   );
 };
 
-const FormPanel = ({ signIn, email, setEmail, pass, setPass }) => {
+const FormPanel = ({ isSignIn, email, setEmail, pass, setPass }) => {
   const dispatch = useDispatch();
   const { user, loading, error } = useSelector((state) => state.auth);
   const navigate = useNavigate();
@@ -37,7 +43,7 @@ const FormPanel = ({ signIn, email, setEmail, pass, setPass }) => {
       Swal.fire({
         icon: "error",
         title: "Oops...",
-        text: 'You are not a registered member',
+        text: error,
       });
     }
   }, [error]);
@@ -50,7 +56,7 @@ const FormPanel = ({ signIn, email, setEmail, pass, setPass }) => {
     }
   };
 
-  const heading = signIn ? 'Sign in' : 'Create account';
+  const heading = isSignIn ? 'Sign in' : 'Create account';
   const social = [
     { icon: 'Google' },
   ];
@@ -61,19 +67,46 @@ const FormPanel = ({ signIn, email, setEmail, pass, setPass }) => {
   ];
 
   const link = { href: '#', text: 'Forgot your password?' };
-  const button = signIn ? 'Sign in' : 'Sign up';
+  const button = isSignIn ? 'Sign in' : 'Sign up';
 
   const submitHandler = e => {
+    
     e.preventDefault();
-    if (signIn) {
+    if (isSignIn) {
       dispatch(loginWithEmail({ email, pass }));
     } else {
-      dispatch(signupWithEmail({ email, pass }));
+      
+      dispatch(signupWithEmail({ email, pass }))
+        .unwrap()
+        .then(() => {
+          Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: "Account created successfully. Please log in.",
+          });
+        })
+        .catch((error) => {
+          // Error handling is done in the useEffect above
+        });
     }
   };
   
   const googleHandler = () => {
-    dispatch(loginWithGoogle());
+    if(isSignIn){
+      dispatch(loginWithGoogle());
+    }else{
+      dispatch(signupWithGoogle())
+      .unwrap()
+      .then((user) => {
+        console.log('Successfully signed up with Google', user);
+        // 추가적인 회원가입 후 처리 로직
+      })
+      .catch((error) => {
+        console.error('Google signup failed:', error);
+        // 에러 처리 로직
+      });
+    }
+    
   };
 
   return (
@@ -94,28 +127,31 @@ const FormPanel = ({ signIn, email, setEmail, pass, setPass }) => {
             type={type} 
             key={placeholder} 
             placeholder={placeholder} 
-            onChange={e => inputHandler(e)} 
+            onChange={inputHandler} 
             value={id === 'email' ? email : pass}
+            required
           />
         ))}
+        <button type="submit" disabled={loading} onClick={submitHandler}>
+          {loading ? 'Loading...' : button}
+        </button>
       </form>
-      {signIn && <a href={link.href}>{link.text}</a>}
-      <button onClick={submitHandler} id={button} disabled={loading}>
-        {loading ? 'Loading...' : button}
-      </button>
+      {isSignIn && <a href={link.href}>{link.text}</a>}
     </div>
   );
 };
 
 const Login = () => {
-  const [signIn, setSignIn] = useState(true);
+  const [isSignIn, setIsSignIn] = useState(true);
   const [transition, setTransition] = useState(false);
   const [pass, setPass] = useState('');
   const [email, setEmail] = useState('');
 
-  const slide = useCallback((setPass, setEmail) => {
-    setPass('');
-    setEmail('');
+  const toggleMode = useCallback(() => {
+    setIsSignIn(prev => !prev);
+  }, []);
+
+  const slide = useCallback(() => {
     if (transition) return;
 
     const formPanel = document.querySelector('.FormPanel');
@@ -133,7 +169,7 @@ const Login = () => {
 
     setTransition(true);
 
-    if (signIn) {
+    if (isSignIn) {
       formPanel.style.transform = `translateX(${actionBoundingRect.width}px)`;
       actionPanel.style.transform = `translateX(${-formBoundingRect.width}px)`;
       [...actionPanelChildren].forEach((child) => {
@@ -158,9 +194,9 @@ const Login = () => {
     setTimeout(() => {
       [...actionPanelChildren].forEach((child) => {
         child.style.transition = 'none';
-        child.style.transform = `translateX(${signIn ? -actionBoundingRect.width / 3 : actionBoundingRect.width / 3}%)`;
+        child.style.transform = `translateX(${isSignIn ? -actionBoundingRect.width / 3 : actionBoundingRect.width / 3}%)`;
       });
-      setSignIn(!signIn);
+      toggleMode();
     }, 350);
 
     setTimeout(() => {
@@ -177,17 +213,17 @@ const Login = () => {
       actionPanel.style.transition = 'none';
       formPanel.style.transform = 'translate(0)';
       actionPanel.style.transform = 'translate(0)';
-      actionPanel.style.order = signIn ? -1 : 1;
+      actionPanel.style.order = isSignIn ? -1 : 1;
       setTransition(false);
     }, 700);
-  }, [signIn, transition]);
+  }, [isSignIn, transition, toggleMode]);
 
   return (
     <>
       <h1 style={{display: 'flex', justifyContent: 'center', fontSize: '100px'}}>SmartModeler</h1>
       <div className="login">
-        <FormPanel signIn={signIn} email={email} setEmail={setEmail} pass={pass} setPass={setPass}/>
-        <ActionPanel signIn={signIn} slide={slide} setEmail={setEmail} setPass={setPass}/>
+        <FormPanel isSignIn={isSignIn} email={email} setEmail={setEmail} pass={pass} setPass={setPass}/>
+        <ActionPanel isSignIn={isSignIn} onModeChange={slide} setEmail={setEmail} setPass={setPass}/>
       </div>
     </>
   );
