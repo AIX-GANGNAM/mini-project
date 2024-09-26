@@ -35,7 +35,7 @@ textarea {
     width: 100%;
     height: 100px;
     padding: 12px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     border: 1px solid #dbdbdb;
     border-radius: 8px;
     font-size: 14px;
@@ -49,14 +49,18 @@ textarea:focus {
     outline: none;
 }
 
-.options {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
+.image-size-selector, .gender-selector {
+    margin-bottom: 20px;
+}
+
+.image-size-selector label, .gender-selector label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
 }
 
 select {
-    flex: 1;
+    width: 100%;
     padding: 10px;
     border: 1px solid #dbdbdb;
     border-radius: 8px;
@@ -76,6 +80,29 @@ select:focus {
     outline: none;
 }
 
+.gender-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.gender-button {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #dbdbdb;
+    background-color: #fff;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.gender-button.active {
+    background-color: #0095f6;
+    color: white;
+    border-color: #0095f6;
+}
+
 .generate-button {
     width: 100%;
     padding: 12px;
@@ -87,6 +114,7 @@ select:focus {
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    margin-top: 20px;
 }
 
 .generate-button:hover {
@@ -157,4 +185,230 @@ select:focus {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+/* 기존 CSS는 그대로 유지하고 아래 내용을 추가하거나 수정합니다 */
+
+.gender-selector {
+    margin-bottom: 20px;
+}
+
+.gender-selector label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.gender-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.gender-button {
+    flex: 1;
+    padding: 12px 20px;
+    border: 2px solid #dbdbdb;
+    background-color: #fff;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-align: center;
+    color: #262626;
+}
+
+.gender-button:hover {
+    border-color: #0095f6;
+    color: #0095f6;
+}
+
+.gender-button.active {
+    background-color: #0095f6;
+    color: white;
+    border-color: #0095f6;
+    box-shadow: 0 2px 4px rgba(0, 149, 246, 0.2);
+}
+
+/* 추가적인 스타일링을 위한 아이콘 (옵션) */
+.gender-button::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    vertical-align: middle;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.gender-button[data-gender="male"]::before {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23262626"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm1-13h-2v6h-6v2h6v6h2v-6h6v-2h-6z"/></svg>');
+}
+
+.gender-button[data-gender="female"]::before {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23262626"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-13c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3z"/></svg>');
+}
+
+.gender-button.active::before {
+    filter: brightness(0) invert(1);
+}
+
+/* 기존 CSS는 그대로 유지하고 아래 내용을 수정하거나 추가합니다 */
+
+.gender-button {
+    flex: 1;
+    padding: 12px 20px;
+    border: 2px solid #dbdbdb;
+    background-color: #fff;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-align: center;
+    color: #262626;
+}
+
+.gender-button:hover {
+    border-color: #0095f6;
+    color: #0095f6;
+}
+
+.gender-button[data-gender="male"].active {
+    background-color: #0095f6;
+    color: white;
+    border-color: #0095f6;
+    box-shadow: 0 2px 4px rgba(0, 149, 246, 0.2);
+}
+
+.gender-button[data-gender="female"].active {
+    background-color: #ff69b4; /* 분홍색 */
+    color: white;
+    border-color: #ff69b4;
+    box-shadow: 0 2px 4px rgba(255, 105, 180, 0.2);
+}
+
+.gender-button[data-gender="male"]::before {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23262626"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm1-13h-2v6h-6v2h6v6h2v-6h6v-2h-6z"/></svg>');
+}
+
+.gender-button[data-gender="female"]::before {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23262626"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-13c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3z"/></svg>');
+}
+
+.gender-button.active::before {
+    filter: brightness(0) invert(1);
+}
+
+/* 호버 효과 수정 */
+.gender-button[data-gender="male"]:hover {
+    border-color: #0095f6;
+    color: #0095f6;
+}
+
+.gender-button[data-gender="female"]:hover {
+    border-color: #ff69b4;
+    color: #ff69b4;
+}
+
+.select-num-images-button {
+    padding: 8px 12px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.select-num-images-button:hover {
+    background-color: #e0e0e0;
+}
+
+.image-count-buttons {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+}
+
+.image-count-buttons .btn {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.image-count-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.count-button {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+    border: 1px solid #ccc;
+    background-color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.count-button.active {
+    background-color: #0095f6;
+    color: white;
+    border-color: #0095f6;
+}
+
+.modal-close {
+    width: 100%;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.modal-close:hover {
+    background-color: #e0e0e0;
+}
+
+.view-images-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #0095f6;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.view-images-link:hover {
+    text-decoration: underline;
 }
