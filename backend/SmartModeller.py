@@ -24,11 +24,12 @@ app = FastAPI()
 # CORS 미들웨어 추가
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # React 앱의 주소
+    allow_origins=["http://localhost:3000", "http://221.148.97.238:3000", "http://221.148.97.238:8000"],
     allow_credentials=True,
     allow_methods=["*"],  # 모든 HTTP 메서드 허용
     allow_headers=["*"],  # 모든 HTTP 헤더 허용
 )
+
 
 # 파일 업로드 엔드포인트
 @app.post("/uploadfile/")
@@ -77,25 +78,50 @@ from pydantic import BaseModel
 class ChatRequest(BaseModel):
     message: str
     negative_prompt: str = ""
+    width: int = 512
+    height: int = 512
+    gender: str = ""
+    num_images: int = 1
 
 @app.post("/chat")
 async def chat_with_gpt(request: ChatRequest):
     try:
         message = request.message
         negative_prompt = request.negative_prompt
+        width = request.width
+        height = request.height
+        gender = request.gender.lower()
+        num_images = request.num_images 
         # 사용자 입력을 프롬프트로 변환
         converted_prompt = await convert_to_prompt(message)
         
+        # 기본 프롬프트 설정
+        base_prompt = "A highly detailed, ultra-realistic portrait, soft lighting, sharp focus, natural skin texture, cinematic, 35mm photography, bokeh background, 4k resolution, vibrant colors, looking directly at the camera, realistic lighting"
+        
+        # 성별에 따라 프롬프트 조정
+        if gender == 'male':
+            base_prompt = base_prompt.replace("portrait", "portrait of a man")
+            full_prompt = f"(man:1.3), {base_prompt}, {converted_prompt}, masculine features, strong jawline"
+            negative_prompt += ", female, woman, feminine features"
+        elif gender == 'female':
+            base_prompt = base_prompt.replace("portrait", "portrait of a woman")
+            full_prompt = f"(woman:1.3), {base_prompt}, {converted_prompt}, feminine features"
+            negative_prompt += ", male, man, masculine features"
+        else:
+            full_prompt = f"{base_prompt}, {converted_prompt}"
+        
+        
         # Stable Diffusion API 요청 형식에 맞게 응답 구성
-        full_prompt = f"A highly detailed, ultra-realistic portrait, soft lighting, sharp focus, natural skin texture, cinematic, 35mm photography, bokeh background, 4k resolution, vibrant colors, looking directly at the camera, realistic lighting, {converted_prompt}"
+        full_prompt = f"{base_prompt}, {converted_prompt}"
         
         response = {
             "prompt": full_prompt,
             "negative_prompt": negative_prompt or "low quality, blurry, deformed, extra limbs, bad anatomy, cartoon, painting, drawing, unrealistic, overexposed, underexposed, noisy, grain",
             "steps": 20,
             "cfg_scale": 7.5,
-            "width": 512,
-            "height": 512
+            "width": width,
+            "height": height,
+            "batch_size": num_images  # 생성할 이미지 수 설정
         }
         
         return response

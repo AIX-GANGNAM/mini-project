@@ -8,6 +8,7 @@ import Main from "./Main";
 import Login from "./Login";
 import Layout from "./Layouts";
 import PrivateRoute from './component/privateRoute';
+import UserImages from './UserImages';  // 이 줄을 추가하세요
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
               <Route path="create" element={<Create />} />
               <Route path="swap" element={<Swap />} />
             </Route>
+            <Route path="my-images" element={<PrivateRoute><UserImages /></PrivateRoute>} />
           </Routes>
         </BrowserRouter>
       </div>
