@@ -101,7 +101,7 @@ body {
   margin: 1rem 0;
 }
 
-.Panel .Social a {
+.Panel .Social button {
   display: flex;
   justify-content: center;
   align-items: center;

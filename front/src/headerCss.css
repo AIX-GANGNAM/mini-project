@@ -1,0 +1,9 @@
+
+.common_header{
+    display: flex;
+    flex-direction: row;
+    width: 80vw;
+    justify-content: end;
+    gap:20px;
+}
+

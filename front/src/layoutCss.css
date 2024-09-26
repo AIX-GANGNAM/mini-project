@@ -1,0 +1,15 @@
+.layout_outline{
+    display: gird;
+    grid-template-rows: 10vh 90vh;
+    grid-template-columns: 100vw;
+    grid-template-areas: 'header'
+                        'outlet';
+}
+.layout_header{
+    grid-area: header;
+  
+}
+
+.layout_outlet{
+    grid-area: outlet;
+}
