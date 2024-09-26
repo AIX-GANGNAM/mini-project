@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginWithEmail, signupWithEmail, loginWithGoogle } from './redux/authSlice';
 import './LoginCss.css'
+import Swal from 'sweetalert2'
 
-const ActionPanel = ({ signIn, slide }) => {
+const ActionPanel = ({ signIn, slide, setEmail, setPass }) => {
   const heading = signIn ? 'Hello friend!' : 'Welcome back!';
   const paragraph = signIn
     ? 'Enter your personal details and start your journey with us'
@@ -13,66 +16,106 @@ const ActionPanel = ({ signIn, slide }) => {
     <div className="Panel ActionPanel">
       <h2>{heading}</h2>
       <p>{paragraph}</p>
-      <button onClick={slide}>{button}</button>
+      <button onClick={() => slide(setEmail, setPass)}>{button}</button>
     </div>
   );
 };
 
-const FormPanel = ({ signIn }) => {
+const FormPanel = ({ signIn, email, setEmail, pass, setPass }) => {
+  const dispatch = useDispatch();
+  const { user, loading, error } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate('/main');
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
+    if (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: 'You are not a registered member',
+      });
+    }
+  }, [error]);
+
+  const inputHandler = e => {
+    if (e.target.id === 'email') {
+      setEmail(e.target.value);
+    } else {
+      setPass(e.target.value);
+    }
+  };
+
   const heading = signIn ? 'Sign in' : 'Create account';
   const social = [
-    { href: '#', icon: 'google' },
+    { icon: 'Google' },
   ];
   const paragraph = 'Or use your email account';
   const inputs = [
-    { type: 'text', placeholder: 'Email' },
-    { type: 'password', placeholder: 'Password' }
+    { type: 'text', placeholder: 'Email', id: "email" },
+    { type: 'password', placeholder: 'Password', id: 'pass' }
   ];
-  
-  if (!signIn) {
-    inputs.unshift({ type: 'text', placeholder: 'Name' });
-  }
 
   const link = { href: '#', text: 'Forgot your password?' };
   const button = signIn ? 'Sign in' : 'Sign up';
 
-  const onClickHandler=e=>{
-    if(signIn){
-        window.location.href='/main'
+  const submitHandler = e => {
+    e.preventDefault();
+    if (signIn) {
+      dispatch(loginWithEmail({ email, pass }));
+    } else {
+      dispatch(signupWithEmail({ email, pass }));
     }
-    
-  }
-
+  };
+  
+  const googleHandler = () => {
+    dispatch(loginWithGoogle());
+  };
 
   return (
     <div className="Panel FormPanel">
       <h2>{heading}</h2>
       <div className="Social">
-        {social.map(({ href, icon }) => (
-          <a href={href} key={icon}>
+        {social.map(({ icon }) => (
+          <button key={icon} onClick={googleHandler}>
             {icon}
-          </a>
+          </button>
         ))}
       </div>
       <p>{paragraph}</p>
       <form>
-        {inputs.map(({ type, placeholder }) => (
-          <input type={type} key={placeholder} placeholder={placeholder} />
+        {inputs.map(({ type, placeholder, id }) => (
+          <input 
+            id={id} 
+            type={type} 
+            key={placeholder} 
+            placeholder={placeholder} 
+            onChange={e => inputHandler(e)} 
+            value={id === 'email' ? email : pass}
+          />
         ))}
       </form>
-      <a href={link.href}>{link.text}</a>
-      <button onClick={e=>onClickHandler(e)} id={button}>{button}</button>
+      {signIn && <a href={link.href}>{link.text}</a>}
+      <button onClick={submitHandler} id={button} disabled={loading}>
+        {loading ? 'Loading...' : button}
+      </button>
     </div>
   );
 };
 
-
-
 const Login = () => {
   const [signIn, setSignIn] = useState(true);
   const [transition, setTransition] = useState(false);
+  const [pass, setPass] = useState('');
+  const [email, setEmail] = useState('');
 
-  const slide = useCallback(() => {
+  const slide = useCallback((setPass, setEmail) => {
+    setPass('');
+    setEmail('');
     if (transition) return;
 
     const formPanel = document.querySelector('.FormPanel');
@@ -141,11 +184,11 @@ const Login = () => {
 
   return (
     <>
-        <h1 style={{display : 'flex', justifyContent : 'center', fontSize : '100px'}}>SmartModeler</h1>
-        <div className="login">
-            <FormPanel signIn={signIn} />
-            <ActionPanel signIn={signIn} slide={slide} />
-        </div>
+      <h1 style={{display: 'flex', justifyContent: 'center', fontSize: '100px'}}>SmartModeler</h1>
+      <div className="login">
+        <FormPanel signIn={signIn} email={email} setEmail={setEmail} pass={pass} setPass={setPass}/>
+        <ActionPanel signIn={signIn} slide={slide} setEmail={setEmail} setPass={setPass}/>
+      </div>
     </>
   );
 };
