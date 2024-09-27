@@ -42,8 +42,7 @@ const Swap = () => {
     formData.append("file2", swapImage);
 
     try {
-      //const response = await axios.post("http://221.148.97.238:8001/uploadfile", formData, {
-        const response = await axios.post("http://localhost:8001/uploadfile", formData, {
+      const response = await axios.post("http://localhost:8001/uploadfile", formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
@@ -67,7 +66,7 @@ const Swap = () => {
     if (swappedImage) {
       const link = document.createElement('a');
       link.href = swappedImage;
-      link.download = 'swapped_image.jpg';
+      link.download = 'swapped_image.jpg'; // 다운로드할 파일 이름 지정
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -116,18 +115,21 @@ const Swap = () => {
 
       <div className="swap-section">
         <h3>한 번의 클릭으로 얼굴 교체</h3>
+        <br />
         <button className="swap-button" onClick={handleSwapClick} disabled={loading}>
           {loading ? "교체 중..." : "교체"}
         </button>
       </div>
 
       <div className="scroll-container">
-        {loading && <p>이미지를 처리하는 중입니다. 잠시만 기다려 주세요...</p>}
+        {loading && <p className='imageLoading'>이미지를 처리하는 중입니다. 잠시만 기다려 주세요...</p>}
         {swappedImage && (
           <div className="result-section">
             <h3>교체된 이미지</h3>
             <img src={swappedImage} alt="Swapped" className="swapped-image" />
-            <button className="swap-button" onClick={handleDownloadClick}>파일 다운로드</button>
+            <br />
+            <br />
+            <button className="swap-button" onClick={handleDownloadClick}>파일 다운로드</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <button className="swap-button" onClick={handleResetClick}>다시 변환하기</button>
           </div>
         )}
