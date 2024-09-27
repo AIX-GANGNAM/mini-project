@@ -8,15 +8,16 @@ const Swap = () => {
   const [swapImage, setSwapImage] = useState(null);
   const [swappedImage, setSwappedImage] = useState(null);
   const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(false); // 로딩 상태 추가
 
   const onDropOriginal = useCallback((acceptedFiles) => {
     const file = acceptedFiles[0];
-    setOriginalImage(file); // URL 대신 파일 객체 저장
+    setOriginalImage(file);
   }, []);
 
   const onDropSwap = useCallback((acceptedFiles) => {
     const file = acceptedFiles[0];
-    setSwapImage(file); // URL 대신 파일 객체 저장
+    setSwapImage(file);
   }, []);
 
   const { getRootProps: getRootPropsOriginal, getInputProps: getInputPropsOriginal } = useDropzone({
@@ -34,11 +35,12 @@ const Swap = () => {
       alert("이미지를 먼저 업로드하세요.");
       return;
     }
-  
+
+    setLoading(true); // 로딩 시작
     const formData = new FormData();
     formData.append("file1", originalImage);
     formData.append("file2", swapImage);
-  
+
     try {
       const response = await axios.post("http://localhost:8000/uploadfile", formData, {
         headers: {
@@ -46,17 +48,17 @@ const Swap = () => {
         },
         responseType: 'blob'
       });
-  
-      // 응답으로 받은 Blob 객체를 URL로 변환하여 이미지로 표시
+
       const blob = new Blob([response.data], { type: 'image/jpeg' });
       const newSwappedImage = URL.createObjectURL(blob);
-      
+
       setSwappedImage(newSwappedImage);
       setHistory(prevHistory => [...prevHistory, newSwappedImage]);
-      // console.log("교체된 이미지:", newSwappedImage);
-  
+
     } catch (error) {
       console.error("이미지 교체 중 오류 발생:", error);
+    } finally {
+      setLoading(false); // 로딩 끝
     }
   };
 
@@ -64,7 +66,7 @@ const Swap = () => {
     if (swappedImage) {
       const link = document.createElement('a');
       link.href = swappedImage;
-      link.download = 'swapped_image.jpg'; // 다운로드할 파일 이름 지정
+      link.download = 'swapped_image.jpg';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -113,10 +115,13 @@ const Swap = () => {
 
       <div className="swap-section">
         <h3>한 번의 클릭으로 얼굴 교체</h3>
-        <button className="swap-button" onClick={handleSwapClick}>교체</button>
+        <button className="swap-button" onClick={handleSwapClick} disabled={loading}>
+          {loading ? "교체 중..." : "교체"}
+        </button>
       </div>
 
       <div className="scroll-container">
+        {loading && <p>이미지를 처리하는 중입니다. 잠시만 기다려 주세요...</p>}
         {swappedImage && (
           <div className="result-section">
             <h3>교체된 이미지</h3>
