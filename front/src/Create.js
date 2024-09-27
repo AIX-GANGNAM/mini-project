@@ -82,7 +82,13 @@ export default function Create() {
         <div className="create-container">
             <div className="input-section">
                 <h2>Image Generation</h2>
-                <Link to="/my-images" className="view-images-link">View My Generated Images</Link>
+                <Link 
+                    to="/my-images"
+                    state={{ from: "create" }}
+                    className="view-images-link"
+                >
+                    View My Generated Images
+                </Link>
                 <div className="gender-selector">
                     <label>Gender:</label>
                     <div className="gender-buttons">

@@ -1,14 +1,22 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import './Swap.css'; // CSS 파일을 통해 스타일 적용
+import { Link } from 'react-router-dom';
+import './Swap.css';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { ref, uploadString } from "firebase/storage";
+import { format } from 'date-fns';
+import { storage } from './firebase/config';
 
 const Swap = () => {
   const [originalImage, setOriginalImage] = useState(null);
   const [swapImage, setSwapImage] = useState(null);
   const [swappedImage, setSwappedImage] = useState(null);
   const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(false); // 로딩 상태 추가
+  const [loading, setLoading] = useState(false);
+
+  const user = useSelector(state => state.auth.user);
+
 
   const onDropOriginal = useCallback((acceptedFiles) => {
     const file = acceptedFiles[0];
@@ -30,19 +38,46 @@ const Swap = () => {
     accept: 'image/*',
   });
 
-  const handleSwapClick = async () => {
+  const saveImageToFirebase = async (blob, index) => {
+    if (!user || !user.uid) return;
+
+    const timestamp = format(new Date(), 'yyyyMMdd_HHmmss');
+    const imagePath = `swap/${user.uid}/${timestamp}/image_${index + 1}.png`;
+    const imageRef = ref(storage, imagePath);
+
+    try {
+      const base64String = await blobToBase64(blob);
+      await uploadString(imageRef, base64String, 'data_url');
+      console.log(`Image ${index + 1} uploaded successfully`);
+    } catch (error) {
+      console.error(`Error uploading image ${index + 1}:`, error);
+    }
+  };
+
+  const blobToBase64 = (blob) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
+
+    const handleSwapClick = async () => {
     if (!originalImage || !swapImage) {
       alert("이미지를 먼저 업로드하세요.");
       return;
     }
 
-    setLoading(true); // 로딩 시작
+    setLoading(true);
     const formData = new FormData();
     formData.append("file1", originalImage);
     formData.append("file2", swapImage);
 
     try {
-      const response = await axios.post("http://localhost:8001/uploadfile", formData, {
+
+      const response = await axios.post("http://221.148.97.237:8001/uploadfile", formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
@@ -55,10 +90,13 @@ const Swap = () => {
       setSwappedImage(newSwappedImage);
       setHistory(prevHistory => [...prevHistory, newSwappedImage]);
 
+      // Firebase에 이미지 저장
+      await saveImageToFirebase(blob, history.length);
+
     } catch (error) {
       console.error("이미지 교체 중 오류 발생:", error);
     } finally {
-      setLoading(false); // 로딩 끝
+      setLoading(false);
     }
   };
 
@@ -83,6 +121,13 @@ const Swap = () => {
     <div className="container">
       <div className="header">
         <div className="tab active">face swap</div>
+        <Link 
+                to="/my-images"
+                state={{ from: "swap" }}
+                className="view-images-link"
+            >
+          내 생성된 이미지 보기
+        </Link>
       </div>
 
       <div className="upload-section">
@@ -131,17 +176,6 @@ const Swap = () => {
             <br />
             <button className="swap-button" onClick={handleDownloadClick}>파일 다운로드</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <button className="swap-button" onClick={handleResetClick}>다시 변환하기</button>
-          </div>
-        )}
-
-        {history.length > 0 && (
-          <div className="history-section">
-            <h3>히스토리</h3>
-            <div className="history-images">
-              {history.map((img, index) => (
-                <img key={index} src={img} alt={`History ${index + 1}`} className="history-image" />
-              ))}
-            </div>
           </div>
         )}
       </div>

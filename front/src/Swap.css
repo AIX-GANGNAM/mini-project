@@ -173,3 +173,30 @@ body {
         width: 100%; /* 작은 화면에서는 전체 너비 사용 */
     }
 }
+
+
+.swapped-image{
+    margin-bottom: 2rem;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .view-images-link {
+    text-decoration: none;
+    color: #4CAF50;
+    font-weight: bold;
+    padding: 8px 16px;
+    border: 2px solid #4CAF50;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+  
+  .view-images-link:hover {
+    background-color: #4CAF50;
+    color: white;
+  }
