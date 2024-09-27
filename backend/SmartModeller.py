@@ -96,7 +96,7 @@ async def chat_with_gpt(request: ChatRequest):
         converted_prompt = await convert_to_prompt(message)
         
         # 기본 프롬프트 설정
-        base_prompt = "A highly detailed, ultra-realistic portrait, soft lighting, sharp focus, natural skin texture, cinematic, 35mm photography, bokeh background, 4k resolution, vibrant colors, looking directly at the camera, realistic lighting"
+        base_prompt = "A highly detailed, ultra-realistic portrait, soft lighting, sharp focus, natural skin texture, cinematic, 35mm photography, bokeh background, 4k resolution, vibrant colors, looking directly at the camera, realistic"
         
         # 성별에 따라 프롬프트 조정
         if gender == 'male':
