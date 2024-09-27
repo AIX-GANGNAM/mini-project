@@ -42,7 +42,8 @@ const Swap = () => {
     formData.append("file2", swapImage);
 
     try {
-      const response = await axios.post("http://localhost:8000/uploadfile", formData, {
+      //const response = await axios.post("http://221.148.97.238:8001/uploadfile", formData, {
+        const response = await axios.post("http://localhost:8001/uploadfile", formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },

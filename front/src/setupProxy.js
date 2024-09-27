@@ -16,4 +16,12 @@ module.exports = function(app) {
             changeOrigin: true,
         })
     );
+
+    app.use(
+        '/swap',
+        createProxyMiddleware({
+            target: 'http://221.148.97.238:8001',
+            changeOrigin: true,
+        })
+    );
 };

@@ -16,6 +16,7 @@ const images = [
 export default function Main(){
 
     const user = useSelector(state => state.auth.user);
+    console.log(user)
 
   useEffect(() => {
     if (user) {
