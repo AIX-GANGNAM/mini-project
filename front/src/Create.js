@@ -5,7 +5,54 @@ import { useSelector } from 'react-redux';
 import { ref, uploadString } from "firebase/storage";
 import { format } from 'date-fns';
 import { storage } from './firebase/config';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
+const translations = {
+  en: {
+    title: "Image Generation",
+    viewImages: "View My Generated Images",
+    gender: "Gender",
+    male: "Male",
+    female: "Female",
+    prompt: "Prompt:",
+    promptPlaceholder: "Enter a description for the image you want to generate.",
+    imageSize: "Image Size:",
+    numImages: "Number of Images:",
+    image: "Image",
+    images: "Images",
+    generateImages: "Generate Images",
+    processingPrompt: "Processing Prompt...",
+    generatingImages: "Generating Images...",
+    proMode: "Pro Mode",
+    proModeTooltip: "It takes about a minute, but generates a perfect model.",
+    downloadImage: "Download Image",
+    selectNumImages: "Select Number of Images",
+    cancel: "Cancel",
+    placeholder: "Your generated images will appear here."
+  },
+  ko: {
+    title: "이미지 생성",
+    viewImages: "내 생성된 이미지 보기",
+    gender: "성별",
+    male: "남성",
+    female: "여성",
+    prompt: "프롬프트:",
+    promptPlaceholder: "생성하고 싶은 이미지에 대한 설명을 입력하세요.",
+    imageSize: "이미지 크기:",
+    numImages: "이미지 수:",
+    image: "이미지",
+    images: "이미지",
+    generateImages: "이미지 생성",
+    processingPrompt: "프롬프트 처리 중...",
+    generatingImages: "이미지 생성 중...",
+    proMode: "프로 모드",
+    proModeTooltip: "1분 정도 걸리지만 완벽한 모델을 생성합니다.",
+    downloadImage: "이미지 다운로드",
+    selectNumImages: "이미지 수 선택",
+    cancel: "취소",
+    placeholder: "생성된 이미지가 여기에 표시됩니다."
+  }
+};
 
 export default function Create() {
     const [prompt, setPrompt] = useState('');
@@ -16,6 +63,8 @@ export default function Create() {
     const [gender, setGender] = useState('');
     const [numImages, setNumImages] = useState(1);
     const [modalOpen, setModalOpen] = useState(false);
+    const [language, setLanguage] = useState('en');
+    const navigate = useNavigate();
 
     const toggleModal = () => setModalOpen(!modalOpen);
 
@@ -25,7 +74,7 @@ export default function Create() {
             const [width, height] = imageSize.split('x').map(Number);
             
             // FastAPI 서버에 요청을 보냅니다. width, height, gender, numImages를 포함시킵니다.
-            const promptResponse = await axios.post('http://221.148.97.238:8000/chat', {
+            const promptResponse = await axios.post('http://localhost:8000/chat', {
                 message: prompt,
                 width: width,
                 height: height,
@@ -78,44 +127,59 @@ export default function Create() {
         }
     };
 
+    const handleProModeClick = () => {
+        navigate('/main/pro-mode');
+    };
+
+    const toggleLanguage = () => {
+        setLanguage(prevLang => prevLang === 'en' ? 'ko' : 'en');
+    };
+
+    const t = translations[language];
+
     return (
         <div className="create-container">
             <div className="input-section">
-                <h2>Image Generation</h2>
+                <div className="header">
+                    <h2>{t.title}</h2>
+                    <button onClick={toggleLanguage} className="language-toggle">
+                        {language === 'en' ? '한국어' : 'English'}
+                    </button>
+                </div>
                 <Link 
                     to="/my-images"
                     state={{ from: "create" }}
                     className="view-images-link"
                 >
-                    View My Generated Images
+                    {t.viewImages}
                 </Link>
                 <div className="gender-selector">
-                    <label>Gender:</label>
+                    <label>{t.gender}:</label>
                     <div className="gender-buttons">
                         <button
                             className={`gender-button ${gender === 'male' ? 'active' : ''}`}
                             onClick={() => setGender('male')}
                             data-gender="male"
                         >
-                            Male
+                            {t.male}
                         </button>
                         <button
                             className={`gender-button ${gender === 'female' ? 'active' : ''}`}
                             onClick={() => setGender('female')}
                             data-gender="female"
                         >
-                            Female
+                            {t.female}
                         </button>
                     </div>
                 </div>
-                <label>Prompt:</label>
+                <label>{t.prompt}</label>
                 <textarea
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
-                    placeholder="Enter a description for the image you want to generate."
+                    placeholder={t.promptPlaceholder}
                 />
                 <div className="image-size-selector">
-                    <label>Image Size:</label>
+                    <label>{t.imageSize}</label>
                     <select value={imageSize} onChange={(e) => setImageSize(e.target.value)}>
                         <option value="256x256">256x256</option>
                         <option value="512x512">512x512</option>
@@ -123,30 +187,41 @@ export default function Create() {
                     </select>
                 </div>
                 <div className="num-images-selector">
-                    <label>Number of Images:</label>
+                    <label>{t.numImages}</label>
                     <button onClick={toggleModal} className="select-num-images-button">
-                        {numImages} {numImages === 1 ? 'Image' : 'Images'}
+                        {numImages} {numImages === 1 ? t.image : t.images}
                     </button>
                 </div>
-                <button
-                    className="generate-button"
-                    onClick={handleGenerate}
-                    disabled={isPromptLoading || isLoading}
-                >
-                    {isPromptLoading ? 'Processing Prompt...' : isLoading ? 'Generating Images...' : 'Generate Images'}
-                </button>
+                <div className="button-group">
+                    <button
+                        className="generate-button"
+                        onClick={handleGenerate}
+                        disabled={isPromptLoading || isLoading}
+                    >
+                        {isPromptLoading ? t.processingPrompt : isLoading ? t.generatingImages : t.generateImages}
+                    </button>
+                    <div className="pro-mode-tooltip">
+                        <button 
+                            className="pro-mode-button"
+                            onClick={handleProModeClick}
+                        >
+                            {t.proMode}
+                        </button>
+                        <span className="pro-mode-tooltiptext">{t.proModeTooltip}</span>
+                    </div>
+                </div>
             </div>
             <div className="result-section">
                 {isPromptLoading && (
                     <div className="loading-overlay">
                         <div className="loading-spinner"></div>
-                        <p>Processing prompt...</p>
+                        <p>{t.processingPrompt}</p>
                     </div>
                 )}
                 {isLoading && (
                     <div className="loading-overlay">
                         <div className="loading-spinner"></div>
-                        <p>Generating images...</p>
+                        <p>{t.generatingImages}</p>
                     </div>
                 )}
                 {generatedImages.length > 0 ? (
@@ -155,14 +230,14 @@ export default function Create() {
                             <div key={index} className="generated-image-container">
                                 <img src={image} alt={`Generated ${index + 1}`} />
                                 <button className="download-button" onClick={() => handleDownload(image, index)}>
-                                    Download Image
+                                    {t.downloadImage}
                                 </button>
                             </div>
                         ))}
                     </div>
                 ) : (
                     <div className="placeholder">
-                        Your generated images will appear here.
+                        {t.placeholder}
                     </div>
                 )}
             </div>
@@ -170,7 +245,7 @@ export default function Create() {
             {modalOpen && (
                 <div className="modal-overlay">
                     <div className="modal-content">
-                        <h2>Select Number of Images</h2>
+                        <h2>{t.selectNumImages}</h2>
                         <div className="image-count-buttons">
                             {[1, 2, 3, 4].map(count => (
                                 <button
@@ -185,7 +260,7 @@ export default function Create() {
                                 </button>
                             ))}
                         </div>
-                        <button className="modal-close" onClick={toggleModal}>Cancel</button>
+                        <button className="modal-close" onClick={toggleModal}>{t.cancel}</button>
                     </div>
                 </div>
             )}

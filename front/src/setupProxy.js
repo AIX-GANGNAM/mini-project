@@ -24,4 +24,12 @@ module.exports = function(app) {
             changeOrigin: true,
         })
     );
+
+    app.use(
+        '/generate',
+        createProxyMiddleware({
+            target: 'http://221.148.97.237:8000',
+            changeOrigin: true,
+        })
+    );
 };
