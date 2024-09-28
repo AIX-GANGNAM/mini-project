@@ -3,14 +3,17 @@ import CustomButton from "./CustomButton"
 import './MainCss.css'
 import createImage from '../src/common/images/createImage.jpg'
 import faceSwap from '../src/common/images/faceSwap.webp'
+import back from '../src/common/images/background.webp'
 import 'animate.css'
 import { useEffect } from "react"
 import { useSelector } from "react-redux"
 import { checkAndResetImageCount } from "./utils/ImageCountReset"
 
+
 const images = [
     {url: createImage, title: 'Create Model'},
-    {url: faceSwap, title: 'Face Swap'}
+    {url: faceSwap, title: 'Face Swap'},
+    {url : back , title : 'Make Background'}
 ]
 
 export default function Main(){
@@ -45,6 +48,11 @@ export default function Main(){
                 <div className="image_swap animate__animated animate__fadeInUp">
                     <NavLink to='swap' style={{width: '100%', height: '100%', display: 'block'}}>
                         <CustomButton image={images[1]} />
+                    </NavLink>
+                </div>
+                <div className="image_back animate__animated animate__fadeInUp">
+                    <NavLink to='back' style={{width: '100%', height: '100%', display: 'block'}}>
+                        <CustomButton image={images[2]} />
                     </NavLink>
                 </div>
             </div>            

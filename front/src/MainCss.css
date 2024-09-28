@@ -21,10 +21,10 @@ body, html {
     width: 80%;
     height: 90%;
     display: grid;
-    grid-template-columns: 45% 45%;
+    grid-template-columns: 30% 30% 30%;
     grid-template-rows: 20% 78%;
-    grid-template-areas: 'title title'
-                         'left right';
+    grid-template-areas: 'title title title'
+                         'left center right';
     grid-column-gap: 10px;
     overflow: hidden;
 }
@@ -48,6 +48,11 @@ body, html {
 }
 
 .image_swap {
+    grid-area: center;
+    overflow: auto;
+    border-radius: 5px;
+}
+.image_back{
     grid-area: right;
     overflow: auto;
     border-radius: 5px;
