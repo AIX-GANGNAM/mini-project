@@ -3,8 +3,10 @@ import {
   signInWithPopup, 
   GoogleAuthProvider, 
   signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword ,
-  fetchSignInMethodsForEmail
+  createUserWithEmailAndPassword,
+  fetchSignInMethodsForEmail,
+  onAuthStateChanged,
+  signOut
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
 
@@ -29,8 +31,8 @@ export const signupWithEmail = createAsyncThunk(
   'auth/signupWithEmail',
   async ({ email, pass }, { rejectWithValue }) => {
     try {
-        console.log('회원가입 기능 구현 ?')
-        console.log(pass)
+      console.log('회원가입 기능 구현 ?')
+      console.log(pass)
       const result = await createUserWithEmailAndPassword(auth, email, pass);
       return result.user;
     } catch (error) {
@@ -53,30 +55,55 @@ export const loginWithGoogle = createAsyncThunk(
 );
 
 export const signupWithGoogle = createAsyncThunk(
-    'auth/signupWithGoogle',
-    async (_, { rejectWithValue }) => {
-      try {
-        const provider = new GoogleAuthProvider();
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-        
-        // 이미 존재하는 계정인지 확인
-        const methods = await fetchSignInMethodsForEmail(auth, user.email);
-        
-        if (methods.length === 0) {
-          // 새 사용자인 경우, 추가적인 회원가입 로직을 여기에 구현할 수 있습니다.
-          // 예: 사용자 프로필 정보를 데이터베이스에 저장
-          console.log('New user signed up with Google');
-          return user;
-        } else {
-          // 이미 존재하는 사용자
-          return rejectWithValue('User already exists. Please login instead.');
-        }
-      } catch (error) {
-        return rejectWithValue(handleAuthError(error));
+  'auth/signupWithGoogle',
+  async (_, { rejectWithValue }) => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      
+      // 이미 존재하는 계정인지 확인
+      const methods = await fetchSignInMethodsForEmail(auth, user.email);
+      
+      if (methods.length === 0) {
+        // 새 사용자인 경우, 추가적인 회원가입 로직을 여기에 구현할 수 있습니다.
+        // 예: 사용자 프로필 정보를 데이터베이스에 저장
+        console.log('New user signed up with Google');
+        return user;
+      } else {
+        // 이미 존재하는 사용자
+        return rejectWithValue('User already exists. Please login instead.');
       }
+    } catch (error) {
+      return rejectWithValue(handleAuthError(error));
     }
-  );
+  }
+);
+
+export const initializeAuth = createAsyncThunk(
+  'auth/initializeAuth',
+  async (_, { dispatch }) => {
+    return new Promise((resolve) => {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          dispatch(setUser(user));
+        } else {
+          dispatch(clearUser());
+        }
+        resolve();
+      });
+    });
+  }
+);
+
+export const logoutUser = createAsyncThunk(
+  'auth/logout',
+  async (_, { dispatch }) => {
+    await signOut(auth);
+    localStorage.removeItem('user');
+    dispatch(clearUser());
+  }
+);
 
 const authSlice = createSlice({
   name: 'auth',
@@ -86,10 +113,13 @@ const authSlice = createSlice({
     error: null,
   },
   reducers: {
-    logout: (state) => {
+    setUser: (state, action) => {
+      state.user = action.payload;
+      localStorage.setItem('user', JSON.stringify(action.payload));
+    },
+    clearUser: (state) => {
       state.user = null;
-      state.loading = false;
-      state.error = null;
+      localStorage.removeItem('user');
     },
     clearError: (state) => {
       state.error = null;
@@ -152,9 +182,20 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
         console.error('Google signup failed:', action.payload);
+      })
+      .addCase(initializeAuth.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(initializeAuth.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.loading = false;
+        state.error = null;
       });
   },
 });
 
-export const { logout, clearError } = authSlice.actions;
+export const { setUser, clearUser, clearError } = authSlice.actions;
 export default authSlice.reducer;

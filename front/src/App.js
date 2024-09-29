@@ -1,35 +1,53 @@
-import React from 'react';
-import { Provider } from 'react-redux';
-import { store } from './redux/store';
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { initializeAuth } from './redux/authSlice';
 import Create from "./Create";
 import Swap from "./Swap";
 import Main from "./Main";
 import Login from "./Login";
 import Layout from "./Layouts";
-import PrivateRoute from './component/privateRoute';
-import UserImages from './UserImages';  // 이 줄을 추가하세요
+import UserImages from './UserImages';
+import Background from './Background';
 
 function App() {
+  const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(true);
+  const user = useSelector(state => state.auth.user);
+
+  useEffect(() => {
+    dispatch(initializeAuth())
+      .unwrap()
+      .finally(() => setIsLoading(false));
+  }, [dispatch]);
+
+  if (isLoading) {
+    return <div className="loading-overlay">
+    <div className="loading-spinner"></div>
+    <p>Loading ...</p>
+</div>; // 또는 로딩 스피너 컴포넌트
+  }
+
   return (
-    <Provider store={store}>
-      <div className="App">
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Login />}>
-              <Route index element={<Login />} />
-              <Route path="login" element={<Login />} />
-            </Route>
-            <Route path="main" element={<PrivateRoute><Layout/></PrivateRoute>}>
-              <Route index element={<Main />} />
-              <Route path="create" element={<Create />} />
-              <Route path="swap" element={<Swap />} />
-            </Route>
-            <Route path="my-images" element={<PrivateRoute><UserImages /></PrivateRoute>} />
-          </Routes>
-        </BrowserRouter>
-      </div>
-    </Provider>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={user ? <Navigate to="/main" /> : <Login />} />
+        <Route path="/login" element={user ? <Navigate to="/main" /> : <Login />} />
+        <Route 
+          path="/main" 
+          element={user ? <Layout /> : <Navigate to="/login" />}
+        >
+          <Route index element={<Main />} />
+          <Route path="create" element={<Create />} />
+          <Route path="swap" element={<Swap />} />
+          <Route path='back' element={<Background/>}/>
+        </Route>
+        <Route 
+          path="/my-images" 
+          element={user ? <UserImages /> : <Navigate to="/login" />} 
+        />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

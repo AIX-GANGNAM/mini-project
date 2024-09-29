@@ -1,0 +1,223 @@
+.back-layout {
+    width: 90vw;
+    height: 88vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.back-container {
+    width: 80%;
+    height: 90%;
+    border-radius: 10px;
+    background-color: #fff;
+    border: 1px solid #dbdbdb;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+}
+
+.back-input {
+    width: 50%;
+    height: 95%;
+    border-right: 1px solid #efefef;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.back-image {
+    width: 90%;
+    height: 50%;
+    border: 2px dashed #cccccc;
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.back-image img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #666;
+}
+
+.upload-placeholder svg {
+    margin-bottom: 10px;
+}
+
+.back-prompt {
+    width: 90%;
+    height: 20%;
+    margin-top: 10px;
+}
+
+.back-select {
+    overflow-y: auto;
+    width: 90%;
+    height: 23%;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.back-day,
+.back-gender,
+.back-category,
+.back-light {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.back-output {
+    width: 50%;
+    height: 95%;
+}
+
+.back-generate-button {
+    width: 90%;
+    padding: 12px;
+    background-color: #0095f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+}
+
+
+/* Common button styles */
+.select-button {
+    flex: 1;
+    padding: 12px 10px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Daytime buttons */
+.back-day .select-button {
+    background-color: #ffd700;
+    color: #262626;
+}
+
+.back-day .select-button:hover {
+    border-color: #ffa500;
+    color: #ffa500;
+}
+
+.back-day .select-button.active {
+    background-color: #ffa500;
+    color: white;
+}
+
+/* Gender buttons */
+.back-gender .select-button {
+    background-color: #ff69b4;
+    color: white;
+}
+
+.back-gender .select-button:hover {
+    border-color: #ff1493;
+    color: #ff1493;
+}
+
+.back-gender .select-button.active {
+    background-color: #ff1493;
+}
+
+/* Background category buttons */
+.back-category .select-button {
+    background-color: #98fb98;
+    color: #262626;
+}
+
+.back-category .select-button:hover {
+    border-color: #32cd32;
+    color: #32cd32;
+}
+
+.back-category .select-button.active {
+    background-color: #32cd32;
+    color: white;
+}
+
+/* Light direction buttons */
+.back-light .select-button {
+    background-color: #add8e6;
+    color: #262626;
+}
+
+.back-light .select-button:hover {
+    border-color: #4169e1;
+    color: #4169e1;
+}
+
+.back-light .select-button.active {
+    background-color: #4169e1;
+    color: white;
+}
+
+/* Specific styles for each button group */
+.back-day .select-button {
+    background-color: #ffd700;
+    color: #262626;
+}
+
+.back-day .select-button.active {
+    background-color: #ffa500;
+    color: white;
+}
+
+.back-gender .select-button {
+    background-color: #ff69b4;
+    color: white;
+}
+
+.back-gender .select-button.active {
+    background-color: #ff1493;
+}
+
+.back-category .select-button {
+    background-color: #98fb98;
+    color: #262626;
+}
+
+.back-category .select-button.active {
+    background-color: #32cd32;
+    color: white;
+}
+
+.back-light .select-button {
+    background-color: #add8e6;
+    color: #262626;
+}
+
+.back-light .select-button.active {
+    background-color: #4169e1;
+    color: white;
+}
+
