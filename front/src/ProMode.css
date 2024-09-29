@@ -1,0 +1,218 @@
+.pro-mode-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.pro-mode-container .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.pro-mode-container .header h1 {
+    font-size: 24px;
+    color: #333;
+}
+
+.pro-mode-container .language-toggle {
+    padding: 8px 16px;
+    background: linear-gradient(45deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.pro-mode-container .language-toggle:hover {
+    background: linear-gradient(45deg, #2980b9, #3498db);
+    transform: translateY(-2px);
+}
+
+.pro-mode-container .input-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.pro-mode-container .input-section label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.pro-mode-container .input-section textarea,
+.pro-mode-container .input-section select,
+.pro-mode-container .input-section input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.pro-mode-container .input-section textarea {
+    height: 100px;
+    resize: vertical;
+}
+
+.pro-mode-container .input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pro-mode-container .input-group label {
+    flex: 1;
+}
+
+.pro-mode-container .input-group select,
+.pro-mode-container .input-group input[type="number"] {
+    flex: 2;
+}
+
+.pro-mode-container .input-group input[type="checkbox"] {
+    width: auto;
+}
+
+.pro-mode-container .generate-button {
+    grid-column: 1 / -1;
+    padding: 12px 24px;
+    background: linear-gradient(45deg, #2ecc71, #27ae60);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.pro-mode-container .generate-button:hover {
+    background: linear-gradient(45deg, #27ae60, #2ecc71);
+    transform: translateY(-2px);
+}
+
+.pro-mode-container .generate-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.pro-mode-container .result-section {
+    margin-top: 30px;
+}
+
+.pro-mode-container .generated-image-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.pro-mode-container .generated-image-container img {
+    max-width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.pro-mode-container .download-button {
+    padding: 10px 20px;
+    background: linear-gradient(45deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.pro-mode-container .download-button:hover {
+    background: linear-gradient(45deg, #2980b9, #3498db);
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .pro-mode-container .input-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 로딩 스피너 추가 */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.loading-content {
+    text-align: center;
+    color: white;
+}
+
+.ai-brain {
+    width: 100px;
+    height: 100px;
+    position: relative;
+    margin: 0 auto 20px;
+}
+
+.circle {
+    position: absolute;
+    border: 3px solid #3498db;
+    border-radius: 50%;
+    opacity: 0;
+    animation: pulse 2s ease-out infinite;
+}
+
+.circle:nth-child(1) {
+    width: 100%;
+    height: 100%;
+    animation-delay: 0s;
+}
+
+.circle:nth-child(2) {
+    width: 66%;
+    height: 66%;
+    top: 17%;
+    left: 17%;
+    animation-delay: 0.5s;
+}
+
+.circle:nth-child(3) {
+    width: 33%;
+    height: 33%;
+    top: 33%;
+    left: 33%;
+    animation-delay: 1s;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+.loading-content p {
+    font-size: 18px;
+    margin-top: 20px;
+    text-shadow: 0 0 10px rgba(52, 152, 219, 0.7);
+}

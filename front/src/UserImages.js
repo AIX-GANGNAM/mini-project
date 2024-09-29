@@ -3,17 +3,20 @@ import { useSelector } from 'react-redux';
 import { storage } from './firebase/config';
 import { ref, listAll, getDownloadURL } from "firebase/storage";
 import './UserImages.css';
+import { useLocation } from 'react-router-dom';
 
 export default function UserImages() {
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(true);
     const user = useSelector(state => state.auth.user);
-
+    const location = useLocation();
+    const { from } = location.state || {};
+    console.log("from:", from);
     useEffect(() => {
         const fetchImages = async () => {
             if (!user || !user.uid) return;
 
-            const listRef = ref(storage, `create/${user.uid}`);
+            const listRef = ref(storage, `${from === 'swap' ? 'swap' : 'create'}/${user.uid}`);
             try {
                 const res = await listAll(listRef);
                 const folderPromises = res.prefixes.map(async (folderRef) => {
@@ -40,7 +43,7 @@ export default function UserImages() {
         };
 
         fetchImages();
-    }, [user]);
+    }, [user, from]);
 
     const handleDownload = async (image) => {
         try {
@@ -62,7 +65,7 @@ export default function UserImages() {
 
     return (
         <div className="user-images-container">
-            <h2>Your Generated Images</h2>
+            <h2>{from === 'swap' ? 'Your Swapped Images' : 'Your Generated Images'}</h2>
             <div className="image-grid">
                 {images.map((image, index) => (
                     <div key={index} className="image-item">

@@ -7,8 +7,10 @@ import Swap from "./Swap";
 import Main from "./Main";
 import Login from "./Login";
 import Layout from "./Layouts";
-import UserImages from './UserImages';
 import Background from './Background';
+import PrivateRoute from './component/privateRoute';
+import UserImages from './UserImages';  // 이 줄을 추가하세요
+import ProMode from './ProMode';
 
 function App() {
   const dispatch = useDispatch();
@@ -41,6 +43,7 @@ function App() {
           <Route path="create" element={<Create />} />
           <Route path="swap" element={<Swap />} />
           <Route path='back' element={<Background/>}/>
+          <Route path="pro-mode" element={<ProMode />} />
         </Route>
         <Route 
           path="/my-images" 

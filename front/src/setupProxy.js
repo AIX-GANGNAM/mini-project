@@ -18,9 +18,17 @@ module.exports = function(app) {
     );
 
     app.use(
-        '/swap',
+        '/uploadfile',
         createProxyMiddleware({
-            target: 'http://221.148.97.238:8001',
+            target: 'http://221.148.97.237:8001',
+            changeOrigin: true,
+        })
+    );
+
+    app.use(
+        '/generate',
+        createProxyMiddleware({
+            target: 'http://221.148.97.237:8000',
             changeOrigin: true,
         })
     );
