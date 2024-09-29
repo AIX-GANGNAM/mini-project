@@ -7,9 +7,9 @@
 }
 .layout_header{
     grid-area: header;
-  
 }
 
 .layout_outlet{
     grid-area: outlet;
+    position: relative;
 }
