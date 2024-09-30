@@ -2,22 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { getStorage, ref, listAll, getDownloadURL } from "firebase/storage";
 import './UserImages.css';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link ,useNavigate } from 'react-router-dom';
+
 
 export default function UserImages() {
+    const navigate = useNavigate();  // useNavigate 훅 선언
     const [images, setImages] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [selectedImage, setSelectedImage] = useState(null);
+    const [loading, setLoading] = useState(true);
     const user = useSelector(state => state.auth.user);
     const location = useLocation();
     const { from } = location.state || {};
-
+    console.log("from:", from);
     useEffect(() => {
         const fetchImages = async () => {
             if (!user || !user.uid) return;
 
+
             const storage = getStorage();
             const listRef = ref(storage, `${from}/${user.uid}`);
+
             try {
                 const res = await listAll(listRef);
                 const folderPromises = res.prefixes.map(async (folderRef) => {
@@ -27,22 +31,26 @@ export default function UserImages() {
                         return { 
                             url: `${url}&t=${new Date().getTime()}`, 
                             name: itemRef.name, 
-                            timestamp: folderRef.name 
+                            timestamp: folderRef.name // timestamp 값이 최신 순으로 정렬하는 데 사용될 값입니다.
                         };
                     });
                     return Promise.all(itemPromises);
                 });
                 const allImages = await Promise.all(folderPromises);
                 const flattenedImages = allImages.flat();
-                console.log("All images:", flattenedImages);
-                setImages(flattenedImages);
+    
+                // 최신순으로 정렬 (timestamp를 기준으로 역순 정렬)
+                const sortedImages = flattenedImages.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+    
+                console.log("All images:", sortedImages);
+                setImages(sortedImages);
             } catch (error) {
                 console.error("Error fetching images: ", error);
             } finally {
                 setLoading(false);
             }
         };
-
+    
         fetchImages();
     }, [user, from]);
 
@@ -60,6 +68,7 @@ export default function UserImages() {
             alert("다운로드에 실패했습니다. 다시 시도해 주세요.");
         }
     };
+
 
     const handleDownload2 = async (image) => {
         // handleDownload1과 동일한 방식으로 처리
@@ -82,6 +91,11 @@ export default function UserImages() {
         } else {
             handleDownload2(image);
         }
+
+    const handleSelectImage = (image) => {
+         // 이미지 선택 후 Create 페이지로 이동
+         navigate('/main/create', { state: { selectedImage: image.url } });
+
     };
 
     const handleImageClick = (image) => {
@@ -93,7 +107,7 @@ export default function UserImages() {
     };
 
     if (loading) {
-        return <div className="loading">Loading...</div>;
+        return <div>Loading...</div>;
     }
 
     return (
@@ -110,24 +124,14 @@ export default function UserImages() {
                                 e.target.src = 'https://via.placeholder.com/150?text=Image+Load+Error';
                             }}
                         />
-                        <div className="image-info">
-                            <p>{image.timestamp}</p>
-                            <p>{image.name}</p>
-                        </div>
+                        <p>{image.timestamp}: {image.name}</p>
+                        <button onClick={() => handleDownload(image)}>다운로드</button>
+                        <button onClick={() => handleSelectImage(image)}>가져가기</button>
                     </div>
                 ))}
             </div>
-            {selectedImage && (
-                <div className="modal" onClick={closeModal}>
-                    <div className="modal-content" onClick={e => e.stopPropagation()}>
-                        <img src={selectedImage.url} alt="Selected" />
-                        <div className="modal-info">
-                            <p>{selectedImage.timestamp}: {selectedImage.name}</p>
-                            <button onClick={() => handleDownload(selectedImage)}>다운로드</button>
-                        </div>
-                    </div>
-                </div>
-            )}
+
+        
         </div>
     );
 }

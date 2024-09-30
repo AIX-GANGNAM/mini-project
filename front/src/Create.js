@@ -6,57 +6,74 @@ import { ref, uploadString } from "firebase/storage";
 import { format } from 'date-fns';
 import { storage } from './firebase/config';
 import { Link, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const translations = {
-  en: {
-    title: "Image Generation",
-    viewImages: "View My Generated Images",
-    gender: "Gender",
-    male: "Male",
-    female: "Female",
-    prompt: "Prompt:",
-    promptPlaceholder: "Enter a description for the image you want to generate.",
-    imageSize: "Image Size:",
-    numImages: "Number of Images:",
-    image: "Image",
-    images: "Images",
-    generateImages: "Generate Images",
-    processingPrompt: "Processing Prompt...",
-    generatingImages: "Generating Images...",
-    proMode: "Pro Mode",
-    proModeTooltip: "It takes about a minute, but generates a perfect model.",
-    downloadImage: "Download Image",
-    selectNumImages: "Select Number of Images",
-    cancel: "Cancel",
-    placeholder: "Your generated images will appear here."
-  },
-  ko: {
-    title: "이미지 생성",
-    viewImages: "내 생성된 이미지 보기",
-    gender: "성별",
-    male: "남성",
-    female: "여성",
-    prompt: "프롬프트:",
-    promptPlaceholder: "생성하고 싶은 이미지에 대한 설명을 입력하세요.",
-    imageSize: "이미지 크기:",
-    numImages: "이미지 수:",
-    image: "이미지",
-    images: "이미지",
-    generateImages: "이미지 생성",
-    processingPrompt: "프롬프트 처리 중...",
-    generatingImages: "이미지 생성 중...",
-    proMode: "프로 모드",
-    proModeTooltip: "1분 정도 걸리지만 완벽한 모델을 생성합니다.",
-    downloadImage: "이미지 다운로드",
-    selectNumImages: "이미지 수 선택",
-    cancel: "취소",
-    placeholder: "생성된 이미지가 여기에 표시됩니다."
-  }
+    en: {
+        title: "Image Generation",
+        viewImages: "View My Generated Images",
+        gender: "Gender",
+        male: "Male",
+        female: "Female",
+        prompt: "Prompt:",
+        promptPlaceholder: "Enter a description for the image you want to generate.",
+        imageSize: "Image Size:",
+        numImages: "Number of Images:",
+        image: "Image",
+        images: "Images",
+        generateImages: "Generate Images",
+        processingPrompt: "Processing Prompt...",
+        generatingImages: "Generating Images...",
+        proMode: "Pro Mode",
+        proModeTooltip: "It takes about a minute, but generates a perfect model.",
+        downloadImage: "Download Image",
+        selectNumImages: "Select Number of Images",
+        cancel: "Cancel",
+        placeholder: "Your generated images will appear here.",
+        go: "Go To Swap"
+    },
+    ko: {
+        title: "이미지 생성",
+        viewImages: "내 생성된 이미지 보기",
+        gender: "성별",
+        male: "남성",
+        female: "여성",
+        prompt: "프롬프트:",
+        promptPlaceholder: "생성하고 싶은 이미지에 대한 설명을 입력하세요.",
+        imageSize: "이미지 크기:",
+        numImages: "이미지 수:",
+        image: "이미지",
+        images: "이미지",
+        generateImages: "이미지 생성",
+        processingPrompt: "프롬프트 처리 중...",
+        generatingImages: "이미지 생성 중...",
+        proMode: "프로 모드",
+        proModeTooltip: "1분 정도 걸리지만 완벽한 모델을 생성합니다.",
+        downloadImage: "이미지 다운로드",
+        selectNumImages: "이미지 수 선택",
+        cancel: "취소",
+        placeholder: "생성된 이미지가 여기에 표시됩니다.",
+        go: "스왑 하기"
+    }
 };
 
 export default function Create() {
+    const location = useLocation();
+    const { selectedImage } = location.state || {}; // UserImages 컴포넌트에서 전달된 이미지
+
+
+    const base64ToBlob = (base64, mime) => {
+        const byteString = atob(base64.split(',')[1]);
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+        return new Blob([ab], { type: mime });
+      };
+
     const [prompt, setPrompt] = useState('');
-    const [generatedImages, setGeneratedImages] = useState([]);
+    const [generatedImages, setGeneratedImages] = useState(selectedImage ? [selectedImage]:[]);
     const [isLoading, setIsLoading] = useState(false);
     const [isPromptLoading, setIsPromptLoading] = useState(false);
     const [imageSize, setImageSize] = useState('512x512');
@@ -72,7 +89,7 @@ export default function Create() {
         setIsPromptLoading(true);
         try {
             const [width, height] = imageSize.split('x').map(Number);
-            
+
             // FastAPI 서버에 요청을 보냅니다. width, height, gender, numImages를 포함시킵니다.
             const promptResponse = await axios.post('http://localhost:8000/chat', {
                 message: prompt,
@@ -85,7 +102,7 @@ export default function Create() {
             setIsLoading(true);
 
             // FastAPI 서버의 응답을 사용하여 Stable Diffusion API에 요청을 보냅니다.
-            const response = await axios.post('http://221.148.97.237:7860/sdapi/v1/txt2img', promptResponse.data);
+            const response = await axios.post('http://192.168.0.162:7860/sdapi/v1/txt2img', promptResponse.data);
 
             if (response.data.images && response.data.images.length > 0) {
                 const images = response.data.images.map(img => `data:image/png;base64,${img}`);
@@ -117,7 +134,7 @@ export default function Create() {
         const timestamp = format(new Date(), 'yyyyMMdd_HHmmss');
         const imagePath = `create/${user.uid}/${timestamp}/image_${index + 1}.png`;
         const imageRef = ref(storage, imagePath);  // 여기서 직접 storage를 사용합니다.
-    
+
         try {
             await uploadString(imageRef, imageData.split(',')[1], 'base64');
             console.log(`Image ${index + 1} uploaded successfully`);
@@ -145,7 +162,7 @@ export default function Create() {
                         {language === 'en' ? '한국어' : 'English'}
                     </button>
                 </div>
-                <Link 
+                <Link
                     to="/my-images"
                     state={{ from: "create" }}
                     className="view-images-link"
@@ -200,7 +217,7 @@ export default function Create() {
                         {isPromptLoading ? t.processingPrompt : isLoading ? t.generatingImages : t.generateImages}
                     </button>
                     <div className="pro-mode-tooltip">
-                        <button 
+                        <button
                             className="pro-mode-button"
                             onClick={handleProModeClick}
                         >
@@ -233,14 +250,25 @@ export default function Create() {
                                 </button>
                             </div>
                         ))}
+                        <div>
+                            <br></br>
+                            <Link
+                                to="/main/swap"
+                                state={{ generatedImage: generatedImages[0] }} // 첫 번째 생성된 이미지만 전달
+                                className="view-images-link"
+                            >
+                                {t.go}
+                            </Link></div>
                     </div>
                 ) : (
                     <div className="placeholder">
                         {t.placeholder}
                     </div>
                 )}
+
+
             </div>
-    
+
             {modalOpen && (
                 <div className="modal-overlay">
                     <div className="modal-content">

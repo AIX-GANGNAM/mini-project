@@ -19,7 +19,7 @@ from fastapi.responses import JSONResponse
 load_dotenv()
 
 # OpenAI 클라이언트 초기화
-client = OpenAI(api_key=OPENAI_API_KEY)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Firebase 초기화
 cred = credentials.Certificate('smartmodeller-firebase-adminsdk-tq05q-e909c9008d.json')
