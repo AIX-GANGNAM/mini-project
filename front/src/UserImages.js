@@ -15,11 +15,10 @@ export default function UserImages() {
     const location = useLocation();
     const { from } = location.state || {};
     console.log("from:", from);
-
     useEffect(() => {
         const fetchImages = async () => {
             if (!user || !user.uid) return;
-
+    
             const listRef = ref(storage, `${from === 'swap' ? 'swap' : 'create'}/${user.uid}`);
             try {
                 const res = await listAll(listRef);
@@ -30,22 +29,26 @@ export default function UserImages() {
                         return { 
                             url: `${url}&t=${new Date().getTime()}`, 
                             name: itemRef.name, 
-                            timestamp: folderRef.name 
+                            timestamp: folderRef.name // timestamp 값이 최신 순으로 정렬하는 데 사용될 값입니다.
                         };
                     });
                     return Promise.all(itemPromises);
                 });
                 const allImages = await Promise.all(folderPromises);
                 const flattenedImages = allImages.flat();
-                console.log("All images:", flattenedImages);
-                setImages(flattenedImages);
+    
+                // 최신순으로 정렬 (timestamp를 기준으로 역순 정렬)
+                const sortedImages = flattenedImages.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+    
+                console.log("All images:", sortedImages);
+                setImages(sortedImages);
             } catch (error) {
                 console.error("Error fetching images: ", error);
             } finally {
                 setLoading(false);
             }
         };
-
+    
         fetchImages();
     }, [user, from]);
 
@@ -68,6 +71,14 @@ export default function UserImages() {
          navigate('/main/create', { state: { selectedImage: image.url } });
     };
 
+    const handleImageClick = (image) => {
+        setSelectedImage(image);
+    };
+
+    const closeModal = () => {
+        setSelectedImage(null);
+    };
+
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -77,7 +88,7 @@ export default function UserImages() {
             <h2>{from === 'swap' ? 'Your Swapped Images' : 'Your Generated Images'}</h2>
             <div className="image-grid">
                 {images.map((image, index) => (
-                    <div key={index} className="image-item">
+                    <div key={index} className="image-item" onClick={() => handleImageClick(image)}>
                         <img 
                             src={image.url} 
                             alt={`Generated ${index + 1}`} 
@@ -93,18 +104,7 @@ export default function UserImages() {
                 ))}
             </div>
 
-            {selectedImage && (
-                <div>
-                    {/* 선택된 이미지를 Create 컴포넌트로 전달 */}
-                    <Link 
-                        to="/create"
-                        state={{ selectedImage }} // 선택된 이미지를 상태로 전달
-                        className="go-to-create"
-                    >
-                        선택한 이미지로 이동
-                    </Link>
-                </div>
-            )}
+        
         </div>
     );
 }
