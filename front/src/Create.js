@@ -129,7 +129,6 @@ export default function Create() {
     };
 
     const user = useSelector(state => state.auth.user);
-    console.log(user.uid);
 
     const saveImageToFirebase = async (imageData, index) => {
         const timestamp = format(new Date(), 'yyyyMMdd_HHmmss');
