@@ -8,15 +8,16 @@ import { useLocation } from 'react-router-dom';
 export default function UserImages() {
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedImage, setSelectedImage] = useState(null);
     const user = useSelector(state => state.auth.user);
     const location = useLocation();
     const { from } = location.state || {};
-    console.log("from:", from);
+
     useEffect(() => {
         const fetchImages = async () => {
             if (!user || !user.uid) return;
 
-            const listRef = ref(storage, `${from === 'swap' ? 'swap' : 'create'}/${user.uid}`);
+            const listRef = ref(storage, `${from}/${user.uid}`);
             try {
                 const res = await listAll(listRef);
                 const folderPromises = res.prefixes.map(async (folderRef) => {
@@ -59,8 +60,16 @@ export default function UserImages() {
         }
     };
 
+    const handleImageClick = (image) => {
+        setSelectedImage(image);
+    };
+
+    const closeModal = () => {
+        setSelectedImage(null);
+    };
+
     if (loading) {
-        return <div>Loading...</div>;
+        return <div className="loading">Loading...</div>;
     }
 
     return (
@@ -68,7 +77,7 @@ export default function UserImages() {
             <h2>{from === 'swap' ? 'Your Swapped Images' : 'Your Generated Images'}</h2>
             <div className="image-grid">
                 {images.map((image, index) => (
-                    <div key={index} className="image-item">
+                    <div key={index} className="image-item" onClick={() => handleImageClick(image)}>
                         <img 
                             src={image.url} 
                             alt={`Generated ${index + 1}`} 
@@ -77,11 +86,24 @@ export default function UserImages() {
                                 e.target.src = 'https://via.placeholder.com/150?text=Image+Load+Error';
                             }}
                         />
-                        <p>{image.timestamp}: {image.name}</p>
-                        <button onClick={() => handleDownload(image)}>다운로드</button>
+                        <div className="image-info">
+                            <p>{image.timestamp}</p>
+                            <p>{image.name}</p>
+                        </div>
                     </div>
                 ))}
             </div>
+            {selectedImage && (
+                <div className="modal" onClick={closeModal}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <img src={selectedImage.url} alt="Selected" />
+                        <div className="modal-info">
+                            <p>{selectedImage.timestamp}: {selectedImage.name}</p>
+                            <button onClick={() => handleDownload(selectedImage)}>다운로드</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
