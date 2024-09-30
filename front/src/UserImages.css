@@ -1,70 +1,116 @@
 .user-images-container {
-    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px;
+    background-color: #f5f5f5;
+}
+
+.user-images-container h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+    font-size: 28px;
 }
 
 .image-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
 }
 
 .image-item {
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.image-item:hover {
+    transform: translateY(-5px);
+}
+
+.image-item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.image-info {
     padding: 10px;
     text-align: center;
 }
 
-.image-item img {
-    max-width: 100%;
-    height: auto;
-}
-
-.image-item p {
-    margin-top: 10px;
-    font-size: 0.9em;
+.image-info p {
+    margin: 5px 0;
+    font-size: 14px;
     color: #666;
 }
 
-.user-images-container {
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #fff;
     padding: 20px;
+    border-radius: 10px;
+    max-width: 80%;
+    max-height: 80%;
+    overflow: auto;
 }
 
-.image-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
+.modal-content img {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
 }
 
-.image-item {
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 10px;
+.modal-info {
+    margin-top: 20px;
     text-align: center;
 }
 
-.image-item img {
-    max-width: 100%;
-    height: auto;
+.modal-info p {
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #333;
 }
 
-.image-item p {
-    margin-top: 10px;
-    font-size: 0.9em;
-    color: #666;
-}
-
-.image-item button {
-    margin-top: 10px;
-    padding: 5px 10px;
+.modal-info button {
+    padding: 10px 20px;
     background-color: #4CAF50;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
+    font-size: 16px;
     transition: background-color 0.3s;
 }
 
-.image-item button:hover {
+.modal-info button:hover {
     background-color: #45a049;
+}
+
+.loading {
+    text-align: center;
+    font-size: 20px;
+    color: #666;
+    margin-top: 50px;
+}
+
+@media (max-width: 768px) {
+    .image-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
 }

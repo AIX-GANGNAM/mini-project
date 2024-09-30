@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux';
 import { ref, uploadString } from "firebase/storage";
 import { format } from 'date-fns';
 import { storage } from './firebase/config';
+import { useLocation } from 'react-router-dom';
 
 const translations = {
   en: {
@@ -40,12 +41,25 @@ const translations = {
 };
 
 const Swap = () => {
-  const [originalImage, setOriginalImage] = useState(null);
+  const location = useLocation();
+  const { generatedImage } = location.state || {}; // 전달된 이미지가 없을 경우 빈 객체
+
+  const [originalImage, setOriginalImage] = useState(generatedImage ? generatedImage : null);
   const [swapImage, setSwapImage] = useState(null);
   const [swappedImage, setSwappedImage] = useState(null);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState('en');
+
+  const base64ToBlob = (base64, mime) => {
+    const byteString = atob(base64.split(',')[1]);
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([ab], { type: mime });
+  };
 
   const user = useSelector(state => state.auth.user);
 
@@ -181,6 +195,29 @@ const Swap = () => {
             </div>
           )}
         </div>
+      <div className="upload-box" {...getRootPropsOriginal()}>
+  <input {...getInputPropsOriginal()} />
+  {originalImage ? (
+    // originalImage가 Firebase URL일 경우 처리
+    typeof originalImage === 'string' && originalImage.startsWith('https://') ? (
+      <img src={originalImage} alt="Original" className="uploaded-image" />
+    ) : (
+      // originalImage가 base64 문자열일 경우 처리
+      typeof originalImage === 'string' && originalImage.startsWith('data:image') ? (
+        <img src={originalImage} alt="Original" className="uploaded-image" />
+      ) : (
+        // originalImage가 File 또는 Blob일 경우 처리
+        <img src={URL.createObjectURL(originalImage)} alt="Original" className="uploaded-image" />
+      )
+    )
+  ) : (
+    <div className="upload-content">
+      <h3>원본 이미지 업로드</h3>
+      <p className="middle-text">얼굴 이외의 영역을 유지합니다</p>
+      <p className="bottom-text">사진을 추가 해주세요</p>
+    </div>
+  )}
+</div>
 
         <div className="upload-box" {...getRootPropsSwap()}>
           <input {...getInputPropsSwap()} />

@@ -1,55 +1,61 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './ProMode.css';
+import { useSelector } from "react-redux";
+import { Link } from 'react-router-dom';  // Link 컴포넌트 import
 
-// 로딩 컴포넌트 추가
+// 로딩 컴포넌트
 const LoadingSpinner = ({ language }) => {
-  const text = language === 'en' ? 'It takes about 1 minute...' : '1분 정도 소요됩니다...';
-  return (
-    <div className="loading-overlay">
-      <div className="loading-content">
-        <div className="ai-brain">
-          <div className="circle"></div>
-          <div className="circle"></div>
-          <div className="circle"></div>
+    const text = language === 'en' ? 'It takes about 1 minute...' : '1분 정도 소요됩니다...';
+    return (
+        <div className="loading-overlay">
+            <div className="loading-content">
+                <div className="ai-brain">
+                    <div className="circle"></div>
+                    <div className="circle"></div>
+                    <div className="circle"></div>
+                </div>
+                <p>{text}</p>
+            </div>
         </div>
-        <p>{text}</p>
-      </div>
-    </div>
-  );
+    );
 };
 
 const translations = {
-  en: {
-    title: "Pro Mode Image Generation",
-    prompt: "Prompt:",
-    promptPlaceholder: "Enter a detailed description for your image",
-    samplingMethod: "Sampling Method:",
-    steps: "Steps:",
-    cfgScale: "CFG Scale:",
-    seed: "Seed:",
-    generateImage: "Generate Image",
-    processing: "Processing...",
-    downloadImage: "Download Image",
-    imageSize: "Image Size:",
-    upscale: "Upscale:",
-    faceRestoration: "Face Restoration:",
-  },
-  ko: {
-    title: "프로 모드 이미지 생성",
-    prompt: "프롬프트:",
-    promptPlaceholder: "이미지에 대한 상세한 설명을 입력하세요",
-    samplingMethod: "샘플링 방법:",
-    steps: "스텝:",
-    cfgScale: "CFG 스케일:",
-    seed: "시드:",
-    generateImage: "이미지 생성",
-    processing: "처리 중...",
-    downloadImage: "이미지 다운로드",
-    imageSize: "이미지 크기:",
-    upscale: "업스케일:",
-    faceRestoration: "얼굴 복원:",
-  }
+    en: {
+        title: "Pro Mode Image Generation",
+        prompt: "Prompt:",
+        promptPlaceholder: "Enter a detailed description for your image",
+        samplingMethod: "Sampling Method:",
+        steps: "Steps:",
+        cfgScale: "CFG Scale:",
+        seed: "Seed:",
+        generateImage: "Generate Image",
+        processing: "Processing...",
+        downloadImage: "Download Image",
+        imageSize: "Image Size:",
+        upscale: "Upscale:",
+        faceRestoration: "Face Restoration:",
+        generatedImage: "Generated Image:",
+        viewImages: "View My Generated Images",
+    },
+    ko: {
+        title: "프로 모드 이미지 생성",
+        prompt: "프롬프트:",
+        promptPlaceholder: "이미지에 대한 상세한 설명을 입력하세요",
+        samplingMethod: "샘플링 방법:",
+        steps: "스텝:",
+        cfgScale: "CFG 스케일:",
+        seed: "시드:",
+        generateImage: "이미지 생성",
+        processing: "처리 중...",
+        downloadImage: "이미지 다운로드",
+        imageSize: "이미지 크기:",
+        upscale: "업스케일:",
+        faceRestoration: "얼굴 복원:",
+        generatedImage: "생성된 이미지:",
+        viewImages: "내가 생성한 이미지 보기",
+    }
 };
 
 export default function ProMode() {
@@ -61,10 +67,12 @@ export default function ProMode() {
     const [imageSize, setImageSize] = useState('512x512');
     const [upscale, setUpscale] = useState(false);
     const [faceRestoration, setFaceRestoration] = useState(false);
-    const [generatedImageUrl, setGeneratedImageUrl] = useState(null);
+    const [generatedImage, setGeneratedImage] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [language, setLanguage] = useState('en');
     const [error, setError] = useState(null);
+
+    const user = useSelector(state => state.auth.user);
 
     const toggleLanguage = () => {
         setLanguage(prevLang => prevLang === 'en' ? 'ko' : 'en');
@@ -77,7 +85,7 @@ export default function ProMode() {
         setError(null);
         try {
             const [width, height] = imageSize.split('x').map(Number);
-            
+
             const params = {
                 prompt: prompt,
                 sampling_method: samplingMethod,
@@ -87,13 +95,14 @@ export default function ProMode() {
                 width: width,
                 height: height,
                 upscale: upscale,
-                face_restoration: faceRestoration
+                face_restoration: faceRestoration,
+                uid : user.uid
             };
-    
+
             const response = await axios.post('http://221.148.97.237:8000/generate', params);
-    
-            if (response.data && response.data.image_url) {
-                setGeneratedImageUrl(response.data.image_url);
+
+            if (response.data && response.data.image) {
+                setGeneratedImage(response.data.image);
             } else {
                 setError('이미지 생성에 실패했습니다.');
             }
@@ -105,8 +114,8 @@ export default function ProMode() {
     };
 
     const handleDownload = () => {
-        if (generatedImageUrl) {
-            window.open(generatedImageUrl, '_blank');
+        if (generatedImage && generatedImage.url) {
+            window.open(generatedImage.url, '_blank');
         }
     };
 
@@ -114,17 +123,28 @@ export default function ProMode() {
         <div className="pro-mode-container">
             <div className="header">
                 <h1>{t.title}</h1>
-                <button onClick={toggleLanguage} className="language-toggle">
-                    {language === 'en' ? '한국어' : 'English'}
-                </button>
+                <div className="header-buttons">
+                    <Link 
+                        to="/my-images"
+                        state={{ from: "promode" }}
+                        className="view-images-link"
+                    >
+                        {t.viewImages}
+                    </Link>
+                    <button onClick={toggleLanguage} className="language-toggle">
+                        {language === 'en' ? '한국어' : 'English'}
+                    </button>
+                </div>
             </div>
             <div className="input-section">
-                <label>{t.prompt}</label>
-                <textarea
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    placeholder={t.promptPlaceholder}
-                />
+                <div className="input-group">
+                    <label>{t.prompt}</label>
+                    <textarea
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
+                        placeholder={t.promptPlaceholder}
+                    />
+                </div>
                 <div className="input-group">
                     <label>{t.samplingMethod}</label>
                     <select value={samplingMethod} onChange={(e) => setSamplingMethod(e.target.value)}>
@@ -168,17 +188,16 @@ export default function ProMode() {
                 </button>
             </div>
             <div className="result-section">
-                {generatedImageUrl && (
+                {generatedImage && (
                     <div className="generated-image-container">
-                        <img src={generatedImageUrl} alt="Generated" />
+                        <h3>{t.generatedImage}</h3>
+                        <img src={generatedImage.url} alt="Generated" />
                         <button className="download-button" onClick={handleDownload}>
                             {t.downloadImage}
                         </button>
                     </div>
                 )}
             </div>
-            
-            {/* 로딩 스피너 추가 */}
             {isLoading && <LoadingSpinner language={language} />}
             {error && <div className="error-message">{error}</div>}
         </div>
