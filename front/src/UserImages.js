@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { storage } from './firebase/config';
-import { ref, listAll, getDownloadURL } from "firebase/storage";
+import { getStorage, ref, listAll, getDownloadURL } from "firebase/storage";
 import './UserImages.css';
 import { useLocation } from 'react-router-dom';
 
@@ -17,6 +16,7 @@ export default function UserImages() {
         const fetchImages = async () => {
             if (!user || !user.uid) return;
 
+            const storage = getStorage();
             const listRef = ref(storage, `${from}/${user.uid}`);
             try {
                 const res = await listAll(listRef);
@@ -46,17 +46,41 @@ export default function UserImages() {
         fetchImages();
     }, [user, from]);
 
-    const handleDownload = async (image) => {
+
+    const handleDownload1 = async (image) => {
         try {
-            const link = document.createElement('a');
-            link.href = image.url;
-            link.download = `${image.timestamp}_${image.name}`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const storage = getStorage();
+            const imageRef = ref(storage, `${from}/${user.uid}/${image.timestamp}/${image.name}`);
+            
+            const downloadURL = await getDownloadURL(imageRef);
+            
+            window.open(downloadURL, '_blank');
         } catch (error) {
             console.error("Download failed:", error);
             alert("다운로드에 실패했습니다. 다시 시도해 주세요.");
+        }
+    };
+
+    const handleDownload2 = async (image) => {
+        // handleDownload1과 동일한 방식으로 처리
+        try {
+            const storage = getStorage();
+            const imageRef = ref(storage, `${from}/${user.uid}/${image.timestamp}/${image.name}`);
+            
+            const downloadURL = await getDownloadURL(imageRef);
+            
+            window.open(downloadURL, '_blank');
+        } catch (error) {
+            console.error("Download failed:", error);
+            alert("다운로드에 실패했습니다. 다시 시도해 주세요.");
+        }
+    };
+
+    const handleDownload = (image) => {
+        if (from === 'swap') {
+            handleDownload1(image);
+        } else {
+            handleDownload2(image);
         }
     };
 
