@@ -8,15 +8,46 @@ import { ref, uploadString } from "firebase/storage";
 import { format } from 'date-fns';
 import { storage } from './firebase/config';
 
+const translations = {
+  en: {
+    title: "Face Swap",
+    originalImage: "Original Image Upload",
+    swapImage: "Swap Face Upload",
+    processPrompt: "Processing...",
+    generate: "Generate",
+    placeholder: "Please add a photo.",
+    viewImages: "View My Images",
+    swapPrompt: "Swap Faces with One Click",
+    swappedImage: "Swapped Image",
+    processingMessage: "Processing the image, please wait...",
+    download: "Download File",
+    reset: "Reset"
+  },
+  ko: {
+    title: "얼굴 교체",
+    originalImage: "원본 이미지 업로드",
+    swapImage: "교체 얼굴 업로드",
+    processPrompt: "처리 중...",
+    generate: "교체",
+    placeholder: "사진을 추가 해주세요.",
+    viewImages: "내 생성된 이미지 보기",
+    swapPrompt: "한 번의 클릭으로 얼굴 교체",
+    swappedImage: "교체된 이미지",
+    processingMessage: "이미지를 처리하는 중입니다. 잠시만 기다려 주세요...",
+    download: "파일 다운로드",
+    reset: "다시 변환하기"
+  }
+};
+
 const Swap = () => {
   const [originalImage, setOriginalImage] = useState(null);
   const [swapImage, setSwapImage] = useState(null);
   const [swappedImage, setSwappedImage] = useState(null);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [language, setLanguage] = useState('en');
 
   const user = useSelector(state => state.auth.user);
-
 
   const onDropOriginal = useCallback((acceptedFiles) => {
     const file = acceptedFiles[0];
@@ -63,10 +94,9 @@ const Swap = () => {
     });
   };
 
-
-    const handleSwapClick = async () => {
+  const handleSwapClick = async () => {
     if (!originalImage || !swapImage) {
-      alert("이미지를 먼저 업로드하세요.");
+      alert(translations[language].placeholder);
       return;
     }
 
@@ -76,8 +106,7 @@ const Swap = () => {
     formData.append("file2", swapImage);
 
     try {
-
-      const response = await axios.post("http://221.148.97.237:8001/uploadfile", formData, {
+      const response = await axios.post("http://localhost:8001/uploadfile", formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
@@ -117,16 +146,26 @@ const Swap = () => {
     setSwappedImage(null);
   };
 
+  const toggleLanguage = () => {
+    setLanguage(prevLang => prevLang === 'en' ? 'ko' : 'en');
+  };
+
   return (
     <div className="container">
       <div className="header">
-        <div className="tab active">face swap</div>
+        <h1>{translations[language].title}</h1>
+        <button onClick={toggleLanguage} className="language-toggle2">
+          {language === 'en' ? '한국어' : 'English'}
+        </button>
+      </div>
+
+      <div className='viewImageSwap'>
         <Link 
-                to="/my-images"
-                state={{ from: "swap" }}
-                className="view-images-link"
-            >
-          내 생성된 이미지 보기
+          to="/my-images"
+          state={{ from: "swap" }}
+          className="view-images-link"
+        >
+          {translations[language].viewImages}
         </Link>
       </div>
 
@@ -137,9 +176,8 @@ const Swap = () => {
             <img src={URL.createObjectURL(originalImage)} alt="Original" className="uploaded-image" />
           ) : (
             <div className="upload-content">
-              <h3>원본 이미지 업로드</h3>
-              <p className="middle-text">얼굴 이외의 영역을 유지합니다</p>
-              <p className="bottom-text">사진을 추가 해주세요</p>
+              <h3>{translations[language].originalImage}</h3>
+              <p className="middle-text">{translations[language].placeholder}</p>
             </div>
           )}
         </div>
@@ -150,32 +188,30 @@ const Swap = () => {
             <img src={URL.createObjectURL(swapImage)} alt="Swap" className="uploaded-image" />
           ) : (
             <div className="upload-content">
-              <h3>교체 얼굴 업로드</h3>
-              <p>원본 이미지에서 얼굴을 교체합니다</p>
-              <p>사진을 추가 해주세요</p>
+              <h3>{translations[language].swapImage}</h3>
+              <p>{translations[language].placeholder}</p>
             </div>
           )}
         </div>
       </div>
 
       <div className="swap-section">
-        <h3>한 번의 클릭으로 얼굴 교체</h3>
+        <h3>{translations[language].swapPrompt}</h3>
         <br />
         <button className="swap-button" onClick={handleSwapClick} disabled={loading}>
-          {loading ? "교체 중..." : "교체"}
+          {loading ? translations[language].processPrompt : translations[language].generate}
         </button>
       </div>
 
       <div className="scroll-container">
-        {loading && <p className='imageLoading'>이미지를 처리하는 중입니다. 잠시만 기다려 주세요...</p>}
+        {loading && <p className='imageLoading'>{translations[language].processPrompt}</p>}
         {swappedImage && (
           <div className="result-section">
-            <h3>교체된 이미지</h3>
+            <h3>{translations[language].swappedImage}</h3>
             <img src={swappedImage} alt="Swapped" className="swapped-image" />
             <br />
-            <br />
-            <button className="swap-button" onClick={handleDownloadClick}>파일 다운로드</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <button className="swap-button" onClick={handleResetClick}>다시 변환하기</button>
+            <button className="swap-button" onClick={handleDownloadClick}>{translations[language].download}</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button className="swap-button" onClick={handleResetClick}>{translations[language].reset}</button>
           </div>
         )}
       </div>

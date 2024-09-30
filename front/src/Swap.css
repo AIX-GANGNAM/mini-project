@@ -34,14 +34,16 @@ body {
 .header {
     text-align: center;
     margin-bottom: 30px;
+    font-size: 16px;
 }
 
 .tab.active {
     font-weight: bold;
-    font-size: 28px; /* 조금 더 큰 폰트 크기 */
+    font-size: 30px; /* 조금 더 큰 폰트 크기 */
     color: #333; /* 어두운 색상 */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
     background-color: #f5f5f5; 
+    margin-left: 1rem;
 }
 
 /* Upload section */
@@ -95,7 +97,7 @@ body {
 }
 
 .swap-button {
-    font-size: 20px; /* 버튼 폰트 크기 */
+    font-size: 15px; /* 버튼 폰트 크기 */
     padding: 12px 24px; /* 버튼 패딩 */
     border: none;
     background-color: #0073e6; /* 버튼 색상 */
@@ -200,3 +202,33 @@ body {
     background-color: #4CAF50;
     color: white;
   }
+
+  .language-toggle2 {
+    padding: 8px 16px;
+    background: linear-gradient(45deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    outline: none;
+    /* margin-left: 20rem; */
+}
+
+.language-toggle2:hover {
+    background: linear-gradient(45deg, #2980b9, #3498db);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.language-toggle2:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
+}
+
+.viewImageSwap{
+    text-align: right;
+}
