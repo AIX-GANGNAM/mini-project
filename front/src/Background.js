@@ -12,6 +12,7 @@ export default function Background() {
   const [image, setImage] = useState(null);
   const [info , setInfo] = useState(null);
   const [loading, setLoading] = useState(false)
+  const [generateImage , setGenerageImage]= useState(null)
 
   const onDrop = useCallback(acceptedFiles => {
     setImage(acceptedFiles[0]);
@@ -42,27 +43,28 @@ export default function Background() {
 
     setLoading(true)
 
-    try{
-      const response = await axios.post('http://localhost:8002/background',formdata,{
+    try {
+      const response = await axios.post('http://localhost:8002/background', formdata, {
         withCredentials: true,
-        headers:{
-          'Content-Type': 'multipart/form-data'
-        },
-        responseType: 'blob'
-      })
+        timeout: 120000
+      });
 
-      const blob = new Blob([response.data], {type: 'image/jpeg'});
-      const newImage = URL.createObjectURL(blob)
+      if (response.data && response.data.image_url) {
+        setGenerageImage(response.data.image_url);
+        console.log("Image URL received:", response.data.image_url);
 
-      console.log(response.data)
-    } catch(error){
-      console.log('이미지 생성중 오류 발생')
-    } finally{
-      setLoading(false)
+      } else {
+        console.error("Unexpected response format", response.data);
+        alert('예상치 못한 응답 형식입니다.');
+      }
+    } catch (error) {
+      console.error('이미지 생성중 오류 발생:', error);
+      // ... (에러 처리 로직)
+    } finally {
+      setLoading(false);
     }
-    
   }
-
+  
   return (
     <div className="back-layout">
       <div className='back-container'>
@@ -179,7 +181,20 @@ export default function Background() {
           </div>
           <button className='back-generate-button' onClick={sendMessage}>background generate</button>
         </div>
-        <div className="back-output"></div>
+        <div className="back-output">
+  {loading ? (
+    <div className="loading-overlay">
+      <div className="loading-spinner"></div>
+      <p>Loading ...</p>
+    </div>
+  ) : generateImage ? (
+    <div className="image-container">
+      <img src={generateImage} alt='생성된 이미지' />
+    </div>
+  ) : (
+    <p>이미지가 생성되지 않았습니다.</p>
+  )}
+</div>
       </div>
     </div>
   );
