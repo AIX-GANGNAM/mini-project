@@ -11,8 +11,9 @@ import json
 import base64
 import os
 import aiohttp
+from aiohttp import FormData
 from fastapi.responses import JSONResponse
-
+from urllib import request
 
 
 # .env 파일 로드
@@ -27,6 +28,17 @@ initialize_app(cred, {
     'storageBucket': 'smartmodeller.appspot.com'
 })
 bucket = storage.bucket()
+
+def upload_image_to_firebase(local_image_path, destination_blob_name):
+    bucket = storage.bucket()
+    blob = bucket.blob(destination_blob_name)
+
+    blob.upload_from_filename(local_image_path)
+
+    # 파일을 공개적으로 접근 가능하게 설정
+    blob.make_public()
+
+    return blob.public_url
 
 app = FastAPI()
 
@@ -156,115 +168,148 @@ async def convert_to_prompt(user_input: str) -> str:
 
 COMFY_API_URL = "http://127.0.0.1:8188"  # ComfyUI 서버 주소
 
-class PromptData(BaseModel):
-    day: str
-    gender : str
-    category : str
-    light : str
-    info : str
+async def load_workflow(file_path: str):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            print(1)
+            workflow = json.load(file)
+        return workflow
+    except FileNotFoundError:
+        print(2)
+        raise HTTPException(status_code=404, detail=f"Workflow file '{file_path}' not found")
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail=f"File '{file_path}' is not a valid JSON file")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred while loading the workflow: {str(e)}")
 
-async def queue_prompt(workflow):
+async def queue_prompt(workflow: dict, client_id: str = ""):
+    print('queue')
+    prompt_url = f"{COMFY_API_URL}/prompt"
+    print(1)
+    payload = {
+        "prompt": workflow,
+        "client_id": client_id
+    }
+    print(2)
     async with aiohttp.ClientSession() as session:
-        print(1)
-        async with session.post(f"{COMFY_API_URL}/prompt", json={"prompt": workflow}) as response:
-            print(2)
+        print(3)
+        async with session.post(prompt_url, json=payload) as response:
+            print(4)
             if response.status != 200:
-                error_text = await response.text()
-                print(f"Error status: {response.status}")
-                raise HTTPException(status_code=response.status, detail=f"ComfyUI Error: {response.reason}")
-                print(4)
+                raise HTTPException(status_code=response.status, detail=f"Error queuing prompt: {await response.text()}")
             result = await response.json()
-            return result['prompt_id']
 
-async def get_image(prompt_id):
+            print(result.get('prompt_id'))
+            return result.get('prompt_id')
+
+async def check_progress(prompt_id: str):
+    print('history')
+    history_url = f"{COMFY_API_URL}/history/{prompt_id}"
+    print(1)
     async with aiohttp.ClientSession() as session:
+        print(2)
         while True:
-            async with session.get(f"{COMFY_API_URL}/history/{prompt_id}") as response:
-                if response.status != 200:
-                    raise HTTPException(status_code=response.status, detail="Failed to get history")
-                history = await response.json()
-                if prompt_id in history:
-                    if history[prompt_id]['status']['status'] == 'completed':
-                        for node_id, node_output in history[prompt_id]['outputs'].items():
-                            if 'images' in node_output:
-                                return node_output['images'][0]
-                    elif history[prompt_id]['status']['status'] == 'error':
-                        raise HTTPException(status_code=500, detail="Workflow execution failed")
+            print(3)
+            async with session.get(history_url) as response:
+                if response.status == 200:
+                    history = await response.json()
+                    if prompt_id in history:
+                        return history[prompt_id]
             await asyncio.sleep(1)
 
+class PromptData(BaseModel):
+    day: str
+    gender: str
+    category: str
+    light: str
+    info: str
 
-@app.post("/background")
-async def generate_image(
-    image : UploadFile = File(...),
-    prompt : str = Form(...)
-):
-    print('http 통신 성공')
-    print(prompt)
+COMFYUI_OUTPUT_DIR = r"C:\Users\201-30\Downloads\Data\Packages\ComfyUI\output"
+
+@app.post('/background')
+async def generate_image(prompt: str= Form(...), image: UploadFile = File(...)):
+    print('http 통신 시작')
     try:
         parsed_data = json.loads(prompt)
         prompt_data = PromptData(**parsed_data)
-        if(prompt_data.gender=='male'):
-            gender = 'handsome guy'
-        elif(prompt_data.gender=='female'):
-            gender = 'beautiful woman'
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        workflow_path = os.path.join(current_dir, 'backworkflow.json')
-        workflow = json.loads(open(workflow_path, 'r', encoding='utf-8').read())
 
-       
-        # 프롬프트 업데이트
-        print(1)
-        workflow["4"]["inputs"]["text"] = f"{gender}, detailed face, asian, {prompt_data.category}, {prompt_data.day}, {prompt_data.info} , 4k resolution, looking directly at the camera"
-        print(2)
-        workflow["5"]["inputs"]["text"] = "embedding:UnrealisticDream, CyberRealistic_Negative, CyberRealistic_Negative_Anime, 6 fingers"
-
-        # 입력 이미지 업데이트
+        # 워크플로우 JSON 파일 로드
+        workflow = await load_workflow('backworkflow.json')
         print(3)
-        image_data = await image.read()
-        print(4)
-        image_base64 = base64.b64encode(image_data).decode('utf-8')
-        print(5)
-        workflow["9"]["inputs"]["image"] = image_base64
-        print(6)
-        # 배경 이미지 업데이트
+        print(prompt_data.light)
+        print(workflow['94'])
+        if prompt_data.light == 'Top':
+            workflow['94']['inputs']['image']='top.png'
+        elif prompt_data.light == 'Bottom':
+            workflow['94']['inputs']['image'] = 'bottom.png'
+        elif prompt_data.light == 'Left':
+            workflow['94']['inputs']['image'] = 'left02.png'
+        elif prompt_data.light == 'Right':
+            workflow['94']['inputs']['image'] = 'right02.png'
+        elif prompt_data.light == 'Center':
+            workflow['94']['inputs']['image'] = 'center.png'
+        
 
-        back_image_path = os.path.join('common', 'images', 'background.webp')
-        with open(back_image_path, "rb") as back_file:
-            back_image_base64 = base64.b64encode(back_file.read()).decode('utf-8')
-        workflow["51"]["inputs"]["image"] = back_image_base64
+        print(11)
+        gender = None
+        if prompt_data.gender == 'male':
+            gender ='hansome guy'
+        elif prompt_data.gender == 'female':
+            gender = 'beautiful woman'
 
-        # LoadImage 노드의 다른 필요한 설정 추가
-        workflow["51"]["inputs"]["upload"] = "data:image/webp;base64"
-        print(8)
-        # 조명 이미지 업데이트
-        print(9)
-        light = prompt_data.light
-        base_light_path = os.path.join('common', 'images')
-        light_image_map = {
-            'Top': 'top.png',
-            'Bottom': 'bottom.png',
-            'Left': 'left02.png',
-            'Right': 'right02.png',
-            'Center': 'center.png'
-        }
-
-        light_image_path = os.path.join(base_light_path, light_image_map.get(light, 'top.png'))
-
-        with open(light_image_path, "rb") as light_file:
-            light_image_base64 = base64.b64encode(light_file.read()).decode('utf-8')
-        workflow["94"]["inputs"]["image"] = f"data:image/png;base64,{light_image_base64}"
-
-
-        print(json.dumps(workflow, indent=2))
-        prompt_id = await queue_prompt(workflow)
+        workflow["4"]["inputs"]["text"] = f"{gender}, detailed face, asian, {prompt_data.category}, {prompt_data.day}, {prompt_data.info}, 4k resolution, looking directly at the camera"
+        workflow["5"]["inputs"]["text"] = "embedding:UnrealisticDream, CyberRealistic_Negative, CyberRealistic_Negative_Anime, 6 fingers"
+        
+        # 워크플로우에 사용자 입력 적용 (예: 프롬프트, 이미지 URL 등)
+        # 이 부분은 실제 워크플로우 구조에 따라 조정해야 합니다
+        # 이미지 업로드 및 URL 설정 로직이 필요할 수 있습니다
+        url = f"{COMFY_API_URL}/upload/image"
+        file_content = await image.read()
         print(10)
-        image_filename = await get_image(prompt_id)
-        return JSONResponse(content={"image_url": f"{COMFY_API_URL}/view?filename={image_filename}"})
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=400, detail="Invalid JSON in workflow file")
+        form = FormData()
+        form.add_field('image', file_content, filename=image.filename, content_type=image.content_type)
+        form.add_field('overwrite', 'true')
+
+        async with aiohttp.ClientSession() as session:
+            print('crayayay')
+            async with session.post(url, data = form) as response:
+                print(12)
+                response_text= await response.text()
+                print(13)
+                if response.status == 200:
+                    print(14)
+                    workflow['9']['inputs']['image']=image.filename
+                    print(15)
+                    # 프롬프트 큐에 추가
+                    prompt_id = await queue_prompt(workflow)
+                    print(16)
+                    # 진행 상황 확인
+                    result = await check_progress(prompt_id)
+                    print(result)
+                    # 결과 이미지 URL 찾기
+
+                    print(17)
+                    final_image_url = result['outputs']['96']['images'][0]['filename']
+                    print(final_image_url)
+
+        print(18)
+        print(final_image_url)
+        if final_image_url:
+            local_image_path = os.path.join(r"C:\Users\201-30\Downloads\Data\Packages\ComfyUI\output", final_image_url)
+            destination_blob_name=f"generated_images/{final_image_url}"
+            firebase_url = upload_image_to_firebase(local_image_path,destination_blob_name)
+            return {'status': 'completed', 'image_url': firebase_url}
+        else:
+            return {'status': 'completed', 'image_url': None}
+        
+        
+        
+        
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8002)
