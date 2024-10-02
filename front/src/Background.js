@@ -132,7 +132,7 @@ export default function Background() {
               Neon City
             </button>
             <button
-              className={`select-button ${category === 'City' ? 'active' : ''}`}
+              className={`select-button ${category === 'newyork City' ? 'active' : ''}`}
               onClick={() => setCategory('newyork City')}
               >
               City
