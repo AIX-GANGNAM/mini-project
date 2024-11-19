@@ -1,6 +1,3 @@
-# mini-project - diging - swap
-
-
 ## 생성형 광고 모델
 
 1.일반인을 촬영한 이미지를 AI 기술을 활용하여 
