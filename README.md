@@ -4,6 +4,16 @@
 <img src="https://latex.codecogs.com/svg.latex?\huge\textcolor{red}{Hello,\ World!}" />
 </p>
 
+<p align="center">
+  <span style="font-size: 24px; color: red;">Hello, World!</span>
+</p>
+
+<p align="center">
+  <img src="https://latex.codecogs.com/svg.latex?\huge\textcolor{red}{Hello,\ World!}" />
+</p>
+
+
+
 1.일반인을 촬영한 이미지를 AI 기술을 활용하여 
 새로운 방식으로 재생성하는 것입니다.
 
